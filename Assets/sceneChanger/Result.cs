@@ -6,12 +6,12 @@ namespace MyGameNamespace
 {
     public class Result : MonoBehaviour
     {
-        public TMP_Text resultText;
+        //public TMP_Text resultText;
         public float displayDuration = 3.0f; // 정산 화면 표시 시간
 
         void Start()
         {
-            resultText.text = "점수: " + GameSceneManager.Instance.score;
+            //resultText.text = "점수: " + GameSceneManager.Instance.score;
             StartCoroutine(DisplayResultAndNextDay());
         }
 

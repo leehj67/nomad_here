@@ -18,7 +18,7 @@ namespace MyGameNamespace
 
             if (dayText != null)
             {
-                dayText.text = GameSceneManager.Instance.currentDay + " 일차...";
+                dayText.text ="Day:"+ GameSceneManager.Instance.currentDay ;
                 StartCoroutine(DisplayTextAndChangeScene());
             }
             else
