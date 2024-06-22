@@ -1,5 +1,5 @@
 using UnityEngine;
-
+using MyGameNamespace; // GameManager ë„¤ì„ìŠ¤í˜ì´ìŠ¤ ì°¸ì¡°
 public class PlayerController : MonoBehaviour
 {
     public float speed = 5.0f;
@@ -8,7 +8,7 @@ public class PlayerController : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-        // Ä³¸¯ÅÍ°¡ °ÔÀÓ ½ÃÀÛ ½Ã GameManager¿¡¼­ Á¦°øÇÏ´Â À§Ä¡¿¡¼­ ½ÃÀÛÇÏµµ·Ï ¼³Á¤
+        // Ä³ï¿½ï¿½ï¿½Í°ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ GameManagerï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½ ï¿½ï¿½Ä¡ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ïµï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
         transform.position = GameManager.Instance.PlayerStartPosition;
         transform.rotation = Quaternion.Euler(0, 0, 90);
     }

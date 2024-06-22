@@ -9,12 +9,13 @@ public class CameraController : MonoBehaviour
     private bool isMoving = false;
     private float targetOrthographicSize;
     private float initialOrthographicSize;
-    private Bounds targetBounds;
+    private Vector3 initialPosition;
 
     void Start()
     {
         mainCamera = Camera.main;
         initialOrthographicSize = mainCamera.orthographicSize;
+        initialPosition = mainCamera.transform.position;
         targetPosition = mainCamera.transform.position;
         targetOrthographicSize = initialOrthographicSize;
     }
@@ -40,7 +41,7 @@ public class CameraController : MonoBehaviour
 
     public void MoveToTarget(Transform targetTransform)
     {
-        targetBounds = CalculateBounds(targetTransform);
+        Bounds targetBounds = CalculateBounds(targetTransform);
 
         // 타겟의 중심으로 카메라 이동
         targetPosition = new Vector3(targetBounds.center.x, targetBounds.center.y, mainCamera.transform.position.z);
@@ -55,7 +56,7 @@ public class CameraController : MonoBehaviour
 
     public void ResetCamera()
     {
-        targetPosition = new Vector3(0, 0, mainCamera.transform.position.z); // 원래 위치로 변경
+        targetPosition = initialPosition; // 원래 위치로 변경
         targetOrthographicSize = initialOrthographicSize; // 원래 줌 크기로 변경
         isMoving = true;
     }

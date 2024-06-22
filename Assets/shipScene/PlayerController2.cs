@@ -8,20 +8,41 @@ public class PlayerController2 : MonoBehaviour
     public TextMeshProUGUI interactionText; // TMP 텍스트
     public Transform cameraTarget; // 카메라가 이동할 목표 객체
     public Material outlineMaterial; // 강조 재질
+    public GameObject uiMonitor; // UI Canvas
+
     private CameraController cameraController;
     private SpriteRenderer previousRenderer;
     private Material originalMaterial;
+    private bool isUIActive = false;
+    private MenuController menuController;
 
     void Start()
     {
         cameraController = Camera.main.GetComponent<CameraController>();
         interactionText.gameObject.SetActive(false); // 초기에는 텍스트를 숨김
+        uiMonitor.SetActive(false); // 초기에는 UI를 숨김
+        menuController = uiMonitor.GetComponent<MenuController>();
     }
 
     void Update()
     {
-        HandleMovement();
-        CheckForInteraction();
+        if (!isUIActive)
+        {
+            HandleMovement();
+            CheckForInteraction();
+        }
+
+        if (isUIActive && Input.GetKeyDown(KeyCode.Escape))
+        {
+            if (menuController.IsMainPageActive())
+            {
+                DeactivateUI();
+            }
+            else
+            {
+                menuController.GoToPreviousPage();
+            }
+        }
     }
 
     void HandleMovement()
@@ -50,6 +71,10 @@ public class PlayerController2 : MonoBehaviour
                     if (IsShipComputer(interactableObject))
                     {
                         cameraController.MoveToTarget(cameraTarget);
+                        uiMonitor.SetActive(true); // UI 활성화
+                        interactionText.gameObject.SetActive(false); // "E를 누르세요" 텍스트 숨기기
+                        menuController.ActivateDefaultState(); // 기본 상태 활성화
+                        isUIActive = true;
                     }
                 }
                 break;
@@ -104,10 +129,11 @@ public class PlayerController2 : MonoBehaviour
         }
     }
 
-    // 디버깅을 위한 Gizmos 표시
-    void OnDrawGizmosSelected()
+    void DeactivateUI()
     {
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, interactionRange);
+        uiMonitor.SetActive(false); // UI 비활성화
+        isUIActive = false;
+        cameraController.ResetCamera(); // 카메라를 원래 위치로 이동
+        interactionText.gameObject.SetActive(true); // "E를 누르세요" 텍스트 다시 표시
     }
 }

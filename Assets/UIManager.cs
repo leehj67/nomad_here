@@ -1,7 +1,7 @@
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
-
+using MyGameNamespace; // GameManager 네임스페이스 참조
 public class UIManager : MonoBehaviour
 {
     public static UIManager instance; // 싱글톤 인스턴스
