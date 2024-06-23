@@ -993,7 +993,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 37fba8d07b1e5bc4abb66f01a1cfa3f8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  resultText: {fileID: 1647136449}
   displayDuration: 3
 --- !u!4 &618360650
 Transform:
@@ -1685,15 +1684,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 51832bee964bfe44db21a4fcd6c1daa6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  wallPrefab: {fileID: 8342415648010170432, guid: 224720a674d03124594ee7cfafdcce97, type: 3}
-  floorPrefab: {fileID: 2661814773118740392, guid: f77f37954fe35ed4281cfa1a2c8a3ea0, type: 3}
-  startPosPrefab: {fileID: 2884594056197911158, guid: 02d3e648b77c83b40838fff3945070ef, type: 3}
-  minX: 0
-  maxX: 20
-  minY: 0
-  maxY: 20
-  tileWidth: 1
-  tileHeight: 1
 --- !u!4 &1389577567
 Transform:
   m_ObjectHideFlags: 0
@@ -1721,13 +1711,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d996c55ed89af2e4e8c2fbc709bea6d0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  wallPrefab: {fileID: 8342415648010170432, guid: 224720a674d03124594ee7cfafdcce97, type: 3}
-  floorPrefab: {fileID: 2661814773118740392, guid: f77f37954fe35ed4281cfa1a2c8a3ea0, type: 3}
-  width: 50
-  height: 50
-  minRoomSize: 5
-  maxLeafSize: 20
-  gameManager: {fileID: 2109281261}
 --- !u!1001 &1468140182
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2017,6 +2000,7 @@ GameObject:
   - component: {fileID: 1680700712}
   - component: {fileID: 1680700713}
   - component: {fileID: 1680700714}
+  - component: {fileID: 1680700715}
   m_Layer: 0
   m_Name: Circle
   m_TagString: Player
@@ -2194,6 +2178,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7b5e4b141212b1243826d04e96721a11, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!95 &1680700715
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1680700706}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 64c057b74a22a8c4e93b4bee0b749f54, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &1763315849
 GameObject:
   m_ObjectHideFlags: 0
@@ -2635,6 +2640,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 72d5cebdbb303954a95ec14163d47726, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  partHealth: 00000000000000000000000000000000
+  planetsInfo: []
+  planetSceneNames: []
 --- !u!4 &2109281262
 Transform:
   m_ObjectHideFlags: 0
