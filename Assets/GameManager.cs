@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace MyGameNamespace
 {
@@ -8,11 +9,30 @@ namespace MyGameNamespace
         public Vector3 PlayerStartPosition { get; private set; }
         public int[] partHealth = new int[4]; // 각 파츠의 건강 상태 (최대 4개의 파츠)
 
+        [System.Serializable]
+        public class PlanetInfo
+        {
+            public string Risk { get; private set; }
+            public int Asset { get; private set; }
+
+            public PlanetInfo(string risk, int asset)
+            {
+                Risk = risk;
+                Asset = asset;
+            }
+        }
+
+        public PlanetInfo[] planetsInfo; // 각 행성의 정보를 저장하는 배열
+        
+        public int SelectedPlanetIndex { get; set; } // 선택된 행성 인덱스를 저장하는 변수
+        public string[] planetSceneNames; // 각 행성 씬의 이름을 저장하는 배열
+
         void Awake()
         {
             if (Instance == null)
             {
                 Instance = this;
+                
                 DontDestroyOnLoad(gameObject); // 씬 전환 시 파괴되지 않음
                 InitializePartHealth(); // 초기 건강 상태 설정
             }
@@ -52,6 +72,39 @@ namespace MyGameNamespace
                 return partHealth[partNumber];
             }
             return -1; // 잘못된 파츠 번호의 경우
+        }
+
+        // 행성 정보를 설정하는 메서드
+        public void SetPlanetInfo(int index, string risk, int asset)
+        {
+            if (planetsInfo == null)
+            {
+                planetsInfo = new PlanetInfo[6]; // 행성 수에 맞게 배열 초기화
+            }
+            planetsInfo[index] = new PlanetInfo(risk, asset);
+        }
+
+        // 행성 정보를 반환하는 메서드
+        public PlanetInfo GetPlanetInfo(int index)
+        {
+            if (planetsInfo != null && index >= 0 && index < planetsInfo.Length)
+            {
+                return planetsInfo[index];
+            }
+            return null; // 잘못된 인덱스의 경우
+        }
+
+        // 행성 씬으로 전환하는 메서드
+        public void LoadPlanetScene(int index)
+        {
+            if (planetSceneNames != null && index >= 0 && index < planetSceneNames.Length)
+            {
+                SceneManager.LoadScene(planetSceneNames[index]);
+            }
+            else
+            {
+                Debug.LogError("Invalid planet index or scene name is missing.");
+            }
         }
     }
 }

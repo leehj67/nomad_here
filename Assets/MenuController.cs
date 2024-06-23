@@ -8,6 +8,7 @@ public class MenuController : MonoBehaviour
     public Color selectedColor = Color.yellow; // 선택된 항목의 색상
     public Color defaultColor = Color.white; // 기본 항목의 색상
     public GameObject[] pages; // 연결된 페이지들
+    public GameObject planetPage; // 행성 정보 페이지
 
     private int selectedIndex = 0;
     private Stack<int> pageHistory = new Stack<int>();
@@ -73,6 +74,13 @@ public class MenuController : MonoBehaviour
         pages[selectedIndex].SetActive(true);
         pageHistory.Push(selectedIndex);
         isMainPage = false;
+
+        // 행성 정보 페이지 선택 시 처리
+        if (menuItems[selectedIndex].text == "Planet") // "Planet" 항목이 선택되었는지 확인
+        {
+            planetPage.SetActive(true);
+            FindObjectOfType<PlanetInfoController>().InitializePlanetInfo(); // 행성 정보 초기화
+        }
     }
 
     void DeactivateAllPages()
@@ -81,6 +89,7 @@ public class MenuController : MonoBehaviour
         {
             page.SetActive(false);
         }
+        planetPage.SetActive(false); // 행성 페이지도 비활성화
     }
 
     public void ActivateDefaultState()
