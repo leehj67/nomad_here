@@ -23,6 +23,7 @@ public class PlayerPlanetMove : MonoBehaviour
 
     public float staminaRecoveryDelay = 3.0f; // 스테미너 회복 대기 시간
     private bool isRecoveringStamina = false; // 스테미너 회복 중인지 여부
+    private bool isTeleporting = false; // 문을 통해 이동 중인지 여부
 
     void Start()
     {
@@ -44,8 +45,11 @@ public class PlayerPlanetMove : MonoBehaviour
 
     void FixedUpdate()
     {
-        Vector2 newPosition = rb.position + moveInput * currentSpeed * Time.fixedDeltaTime;
-        rb.MovePosition(newPosition);
+        if (!isTeleporting)
+        {
+            Vector2 newPosition = rb.position + moveInput * currentSpeed * Time.fixedDeltaTime;
+            rb.MovePosition(newPosition);
+        }
     }
 
     void HandleStamina()
@@ -110,5 +114,38 @@ public class PlayerPlanetMove : MonoBehaviour
         colors.selectedColor = isRunning ? Color.green : Color.red;
         colors.highlightedColor = isRunning ? Color.green : Color.red;
         toggleRunWalkButton.colors = colors;
+    }
+
+    void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.CompareTag("Door"))
+        {
+            Door door = collision.GetComponent<Door>();
+            if (door != null && door.targetPosition != null && door.targetSpriteRenderer != null)
+            {
+                StartCoroutine(TeleportToTarget(door.targetPosition, door.targetSpriteRenderer));
+            }
+        }
+    }
+
+    private IEnumerator TeleportToTarget(Transform targetPosition, SpriteRenderer targetSpriteRenderer)
+    {
+        isTeleporting = true;
+        yield return new WaitForEndOfFrame();
+
+        // 타겟 스프라이트의 중앙과 크기 가져오기
+        Vector3 spriteCenter = targetSpriteRenderer.bounds.center;
+        Vector2 spriteSize = targetSpriteRenderer.bounds.size;
+
+        // 카메라 이동 및 줌
+        cameraController.SetCameraPosition(spriteCenter, spriteSize);
+
+        yield return new WaitForEndOfFrame();
+
+        // 이동 후 문에서 약간 떨어진 위치로 이동하여 무한 반복 방지
+        Vector3 offset = (targetPosition.position - transform.position).normalized * 2.0f; // 2 유닛 떨어진 위치
+        transform.position = targetPosition.position + offset;
+
+        isTeleporting = false;
     }
 }
