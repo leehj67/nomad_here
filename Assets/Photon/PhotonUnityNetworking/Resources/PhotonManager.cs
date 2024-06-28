@@ -1,6 +1,6 @@
 using UnityEngine;
 using Photon.Pun;
-using Photon.Realtime;
+using Photon.Realtime; // Add this line to access RoomOptions and other necessary classes
 
 public class PhotonManager : MonoBehaviourPunCallbacks
 {
@@ -89,7 +89,8 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     public override void OnJoinedRoom()
     {
         Debug.Log($"Joined Room: {PhotonNetwork.CurrentRoom.Name}");
-        // Load game scene or instantiate player
+        // Load the game scene when a room is successfully joined
+        PhotonNetwork.LoadLevel("GameScene");
     }
 
     public override void OnCreateRoomFailed(short returnCode, string message)
