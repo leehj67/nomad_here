@@ -15,7 +15,10 @@ public class NetworkManager : MonoBehaviourPunCallbacks
     public override void OnConnectedToMaster()
     {
         Debug.Log("Connected to Master");
-        PhotonNetwork.JoinLobby();
+        if (!PhotonNetwork.InLobby)
+        {
+            PhotonNetwork.JoinLobby(); // 로비에 접속합니다.
+        }
     }
 
     public override void OnJoinedLobby()
@@ -26,13 +29,20 @@ public class NetworkManager : MonoBehaviourPunCallbacks
     public void CreateRoom(string roomName)
     {
         Debug.Log("Creating room: " + roomName);
-        try
+        if (PhotonNetwork.InLobby)
         {
-            PhotonNetwork.CreateRoom(roomName, new RoomOptions { MaxPlayers = 4 });
+            try
+            {
+                PhotonNetwork.CreateRoom(roomName, new RoomOptions { MaxPlayers = 4 });
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogError("CreateRoom exception: " + ex.Message);
+            }
         }
-        catch (System.Exception ex)
+        else
         {
-            Debug.LogError("CreateRoom exception: " + ex.Message);
+            Debug.LogWarning("Not in Lobby, cannot create room.");
         }
     }
 
@@ -52,5 +62,14 @@ public class NetworkManager : MonoBehaviourPunCallbacks
     public override void OnJoinedRoom()
     {
         Debug.Log("Joined Room");
+        UpdateRoomPlayerCount();
+    }
+
+    private void UpdateRoomPlayerCount()
+    {
+        if (PhotonNetwork.CurrentRoom != null)
+        {
+            Debug.Log("Players in room: " + PhotonNetwork.CurrentRoom.PlayerCount);
+        }
     }
 }

@@ -15,6 +15,7 @@ public class RoomManager : MonoBehaviourPunCallbacks
     public GameObject panel;
     private NetworkManager networkManager;
     private bool isConnectedToMaster = false;
+    private List<RoomInfo> roomList = new List<RoomInfo>();
 
     void Start()
     {
@@ -22,24 +23,32 @@ public class RoomManager : MonoBehaviourPunCallbacks
 
         startGameButton.gameObject.SetActive(false);
         panel.SetActive(true); // 시작 시 패널을 활성화 상태로 설정합니다.
-        PhotonNetwork.ConnectUsingSettings();
+        if (!PhotonNetwork.IsConnected)
+        {
+            PhotonNetwork.ConnectUsingSettings();
+        }
     }
 
     public override void OnConnectedToMaster()
     {
         Debug.Log("Connected to Master from RoomManager");
-        PhotonNetwork.JoinLobby();
+        if (!PhotonNetwork.InLobby)
+        {
+            PhotonNetwork.JoinLobby(); // 로비에 접속합니다.
+        }
         isConnectedToMaster = true;
     }
 
     public override void OnJoinedLobby()
     {
         Debug.Log("Joined Lobby from RoomManager");
+        UpdateRoomList(roomList); // 로비에 접속할 때 방 목록을 업데이트합니다.
     }
 
-    public override void OnRoomListUpdate(List<RoomInfo> roomList)
+    public override void OnRoomListUpdate(List<RoomInfo> updatedRoomList)
     {
-        Debug.Log("Room list updated with " + roomList.Count + " rooms");
+        Debug.Log("Room list updated with " + updatedRoomList.Count + " rooms");
+        roomList = updatedRoomList;
         UpdateRoomList(roomList);
     }
 
@@ -55,6 +64,8 @@ public class RoomManager : MonoBehaviourPunCallbacks
             {
                 networkManager.CreateRoom(roomName);
                 Debug.Log("CreateRoom called successfully");
+                // 방 생성 후 로비에 다시 참여
+                PhotonNetwork.JoinLobby();
             }
             catch (System.Exception ex)
             {
@@ -84,7 +95,6 @@ public class RoomManager : MonoBehaviourPunCallbacks
     public override void OnJoinedRoom()
     {
         Debug.Log("OnJoinedRoom called in RoomManager");
-        panel.SetActive(true); // 방에 들어간 후에도 패널을 활성화 상태로 유지합니다.
         if (PhotonNetwork.IsMasterClient)
         {
             startGameButton.gameObject.SetActive(true);
@@ -93,6 +103,7 @@ public class RoomManager : MonoBehaviourPunCallbacks
         {
             startGameButton.gameObject.SetActive(false);
         }
+        UpdateRoomPlayerCount();
     }
 
     private void UpdateRoomList(List<RoomInfo> roomList)
@@ -104,27 +115,39 @@ public class RoomManager : MonoBehaviourPunCallbacks
 
         foreach (RoomInfo room in roomList)
         {
-            Debug.Log("Creating room item for: " + room.Name);
-            GameObject roomItemObject = Instantiate(roomItemPrefab, roomListParent);
-            if (roomItemObject != null)
+            if (room.IsVisible && room.IsOpen) // 방이 공개되고 열려 있는지 확인
             {
-                RoomItemPrefab roomItem = roomItemObject.GetComponent<RoomItemPrefab>();
-                if (roomItem != null)
+                Debug.Log("Creating room item for: " + room.Name);
+                GameObject roomItemObject = Instantiate(roomItemPrefab, roomListParent);
+                if (roomItemObject != null)
                 {
-                    roomItem.roomNameText.text = room.Name;
-                    roomItem.playersText.text = $"{room.PlayerCount}/{room.MaxPlayers}";
-                    roomItem.joinButton.onClick.AddListener(() => JoinRoom(room.Name));
-                    Debug.Log("Room item created for: " + room.Name);
+                    RoomItemPrefab roomItem = roomItemObject.GetComponent<RoomItemPrefab>();
+                    if (roomItem != null)
+                    {
+                        roomItem.roomNameText.text = room.Name;
+                        roomItem.playersText.text = $"{room.PlayerCount}/{room.MaxPlayers}";
+                        roomItem.joinButton.onClick.RemoveAllListeners(); // 기존의 모든 리스너 제거
+                        roomItem.joinButton.onClick.AddListener(() => JoinRoom(room.Name)); // 새로운 리스너 추가
+                        Debug.Log("Room item created for: " + room.Name);
+                    }
+                    else
+                    {
+                        Debug.LogError("RoomItemPrefab component missing in roomItemObject");
+                    }
                 }
                 else
                 {
-                    Debug.LogError("RoomItemPrefab component missing in roomItemObject");
+                    Debug.LogError("Failed to instantiate room item prefab");
                 }
             }
-            else
-            {
-                Debug.LogError("Failed to instantiate room item prefab");
-            }
+        }
+    }
+
+    private void UpdateRoomPlayerCount()
+    {
+        if (PhotonNetwork.CurrentRoom != null)
+        {
+            Debug.Log("Players in room: " + PhotonNetwork.CurrentRoom.PlayerCount);
         }
     }
 
@@ -132,8 +155,15 @@ public class RoomManager : MonoBehaviourPunCallbacks
     {
         if (PhotonNetwork.IsMasterClient)
         {
-            Debug.Log("MasterClient starting the game");
-            PhotonNetwork.LoadLevel("GameScene");
+            if (PhotonNetwork.CurrentRoom.PlayerCount == PhotonNetwork.CurrentRoom.MaxPlayers)
+            {
+                Debug.Log("MasterClient starting the game");
+                PhotonNetwork.LoadLevel("GameScene");
+            }
+            else
+            {
+                Debug.LogWarning("Cannot start game. Not enough players.");
+            }
         }
     }
 }
