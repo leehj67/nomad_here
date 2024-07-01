@@ -9,7 +9,8 @@ public class RoomManager : MonoBehaviourPunCallbacks
 {
     public GameObject roomItemPrefab;
     public Transform roomListParent;
-    public TMP_InputField playerNameInput;
+    public TMP_InputField roomNameInput;
+    public TMP_InputField playerNameInput; // 플레이어 이름 입력 필드 추가
     public Button createRoomButton;
     public Button startGameButton;
     public GameObject panel;
@@ -55,26 +56,33 @@ public class RoomManager : MonoBehaviourPunCallbacks
     public void CreateRoom()
     {
         Debug.Log("CreateRoom method called");
-        if (!string.IsNullOrEmpty(playerNameInput.text) && isConnectedToMaster)
+        if (!string.IsNullOrEmpty(roomNameInput.text) && isConnectedToMaster)
         {
-            PhotonNetwork.NickName = playerNameInput.text;
-            string roomName = "Room_" + playerNameInput.text;
-            Debug.Log("Trying to create room: " + roomName);
-            try
+            if (!string.IsNullOrEmpty(playerNameInput.text))
             {
-                networkManager.CreateRoom(roomName);
-                Debug.Log("CreateRoom called successfully");
-                // 방 생성 후 로비에 다시 참여
-                PhotonNetwork.JoinLobby();
+                PhotonNetwork.NickName = playerNameInput.text;
+                string roomName = roomNameInput.text;
+                Debug.Log("Trying to create room: " + roomName);
+                try
+                {
+                    networkManager.CreateRoom(roomName);
+                    Debug.Log("CreateRoom called successfully");
+                    // 방 생성 후 로비에 다시 참여
+                    PhotonNetwork.JoinLobby();
+                }
+                catch (System.Exception ex)
+                {
+                    Debug.LogError("Failed to create room: " + ex.Message);
+                }
             }
-            catch (System.Exception ex)
+            else
             {
-                Debug.LogError("Failed to create room: " + ex.Message);
+                Debug.LogWarning("Player name is empty! Please enter a player name.");
             }
         }
         else
         {
-            Debug.LogWarning("Player name is empty or not connected to master!");
+            Debug.LogWarning("Room name is empty or not connected to master!");
         }
     }
 
@@ -88,7 +96,7 @@ public class RoomManager : MonoBehaviourPunCallbacks
         }
         else
         {
-            Debug.LogWarning("Player name is empty!");
+            Debug.LogWarning("Player name is empty! Please enter a player name.");
         }
     }
 
@@ -155,15 +163,9 @@ public class RoomManager : MonoBehaviourPunCallbacks
     {
         if (PhotonNetwork.IsMasterClient)
         {
-            if (PhotonNetwork.CurrentRoom.PlayerCount == PhotonNetwork.CurrentRoom.MaxPlayers)
-            {
-                Debug.Log("MasterClient starting the game");
-                PhotonNetwork.LoadLevel("GameScene");
-            }
-            else
-            {
-                Debug.LogWarning("Cannot start game. Not enough players.");
-            }
+            // 플레이어 수와 상관없이 게임 시작
+            Debug.Log("MasterClient starting the game");
+            PhotonNetwork.LoadLevel("GameScene");
         }
     }
 }
