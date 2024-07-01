@@ -1,9 +1,10 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Photon.Pun;
 
 namespace MyGameNamespace
 {
-    public class GameManager : MonoBehaviour
+    public class GameManager : MonoBehaviourPunCallbacks
     {
         public static GameManager Instance { get; private set; }
         public Vector3 PlayerStartPosition { get; private set; }
@@ -23,16 +24,16 @@ namespace MyGameNamespace
         }
 
         public PlanetInfo[] planetsInfo; // 각 행성의 정보를 저장하는 배열
-        
         public int SelectedPlanetIndex { get; set; } // 선택된 행성 인덱스를 저장하는 변수
         public string[] planetSceneNames; // 각 행성 씬의 이름을 저장하는 배열
+        public GameObject playerPrefab; // 플레이어 프리팹
+        public Transform[] spawnPoints; // 스폰 포인트 배열
 
         void Awake()
         {
             if (Instance == null)
             {
                 Instance = this;
-                
                 DontDestroyOnLoad(gameObject); // 씬 전환 시 파괴되지 않음
                 InitializePartHealth(); // 초기 건강 상태 설정
             }
@@ -104,6 +105,21 @@ namespace MyGameNamespace
             else
             {
                 Debug.LogError("Invalid planet index or scene name is missing.");
+            }
+        }
+
+        public override void OnJoinedRoom()
+        {
+            base.OnJoinedRoom();
+
+            if (PhotonNetwork.IsConnectedAndReady)
+            {
+                int spawnIndex = PhotonNetwork.LocalPlayer.ActorNumber - 1;
+                Vector3 spawnPosition = spawnPoints[spawnIndex].position;
+                GameObject player = PhotonNetwork.Instantiate(playerPrefab.name, spawnPosition, Quaternion.identity);
+
+                Camera.main.GetComponent<CameraFollow>().SetTarget(player.transform);
+                player.GetComponent<PlayerControllerMain>().InitializeUI();
             }
         }
     }

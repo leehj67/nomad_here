@@ -2,6 +2,7 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 using Photon.Pun;
+using Photon.Realtime;  // This line is crucial to access RoomOptions and related functionalities
 
 public class LobbyUI : MonoBehaviour
 {
@@ -20,15 +21,8 @@ public class LobbyUI : MonoBehaviour
         string roomName = roomNameInput.text;
         if (!string.IsNullOrEmpty(roomName))
         {
-            if (PhotonManager.Instance == null)
-            {
-                Debug.LogError("PhotonManager.Instance is null!");
-            }
-            else
-            {
-                Debug.Log($"Request to create room: {roomName}");
-                PhotonManager.Instance.CreateRoom(roomName);
-            }
+            Debug.Log($"Request to create room: {roomName}");
+            PhotonManager.Instance.CreateRoom(roomName);
         }
     }
 
@@ -37,15 +31,8 @@ public class LobbyUI : MonoBehaviour
         string roomName = roomNameInput.text;
         if (!string.IsNullOrEmpty(roomName))
         {
-            if (PhotonManager.Instance == null)
-            {
-                Debug.LogError("PhotonManager.Instance is null!");
-            }
-            else
-            {
-                Debug.Log($"Request to join room: {roomName}");
-                PhotonManager.Instance.JoinRoom(roomName);
-            }
+            Debug.Log($"Request to join room: {roomName}");
+            PhotonManager.Instance.JoinRoom(roomName);
         }
     }
 }
