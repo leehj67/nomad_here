@@ -1,6 +1,6 @@
 using UnityEngine;
 using Photon.Pun;
-using Photon.Realtime; // Add this line to access RoomOptions and other necessary classes
+using Photon.Realtime;
 
 public class PhotonManager : MonoBehaviourPunCallbacks
 {
