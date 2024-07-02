@@ -118,7 +118,14 @@ public class LobbyManager : MonoBehaviourPunCallbacks
         RoomInfo roomInfo = cachedRoomList.Find(r => r.Name == roomName);
         if (roomInfo != null)
         {
-            PasswordPanel.Instance.OpenPanel(roomInfo);
+            if (PasswordPanel.Instance != null)
+            {
+                PasswordPanel.Instance.OpenPanel(roomInfo);
+            }
+            else
+            {
+                Debug.LogError("PasswordPanel.Instance is null");
+            }
         }
         else
         {
