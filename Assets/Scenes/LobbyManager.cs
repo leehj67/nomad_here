@@ -13,6 +13,7 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     public Transform scrollViewContent;
     public GameObject roomPrefab;
     public Button startGameButton; // 호스트의 게임 시작 버튼
+    public PasswordPanel passwordPanel; // 패스워드 패널
 
     private List<RoomInfo> cachedRoomList = new List<RoomInfo>();
 
@@ -118,13 +119,13 @@ public class LobbyManager : MonoBehaviourPunCallbacks
         RoomInfo roomInfo = cachedRoomList.Find(r => r.Name == roomName);
         if (roomInfo != null)
         {
-            if (PasswordPanel.Instance != null)
+            if (passwordPanel != null)
             {
-                PasswordPanel.Instance.OpenPanel(roomInfo);
+                passwordPanel.OpenPanel(roomInfo);
             }
             else
             {
-                Debug.LogError("PasswordPanel.Instance is null");
+                Debug.LogError("passwordPanel is null");
             }
         }
         else
