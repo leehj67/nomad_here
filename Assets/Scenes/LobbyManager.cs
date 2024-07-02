@@ -42,6 +42,8 @@ public class LobbyManager : MonoBehaviourPunCallbacks
         {
             startGameButton.gameObject.SetActive(true);
         }
+
+        // 방 목록을 갱신
         UpdateRoomList();
     }
 
@@ -75,7 +77,18 @@ public class LobbyManager : MonoBehaviourPunCallbacks
             roomRect.anchoredPosition = Vector2.zero; // 위치를 초기화
 
             RoomItem roomItem = newRoom.GetComponent<RoomItem>();
-            roomItem.SetRoomInfo(room.Name, room.PlayerCount, this);
+            roomItem.SetRoomInfo(room.Name, room.PlayerCount, this, PhotonNetwork.IsMasterClient);
+        }
+
+        // 현재 참가한 방도 추가
+        if (PhotonNetwork.InRoom)
+        {
+            GameObject newRoom = Instantiate(roomPrefab, scrollViewContent);
+            RectTransform roomRect = newRoom.GetComponent<RectTransform>();
+            roomRect.anchoredPosition = Vector2.zero; // 위치를 초기화
+
+            RoomItem roomItem = newRoom.GetComponent<RoomItem>();
+            roomItem.SetRoomInfo(PhotonNetwork.CurrentRoom.Name, PhotonNetwork.CurrentRoom.PlayerCount, this, PhotonNetwork.IsMasterClient);
         }
     }
 
