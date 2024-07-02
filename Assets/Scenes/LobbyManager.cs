@@ -72,27 +72,14 @@ public class LobbyManager : MonoBehaviourPunCallbacks
 
     void UpdateRoomList()
     {
-        foreach (Transform child in scrollViewContent)
-        {
-            Destroy(child.gameObject);
-        }
-
-        foreach (RoomInfo room in cachedRoomList)
-        {
-            GameObject newRoom = Instantiate(roomPrefab, scrollViewContent);
-            RectTransform roomRect = newRoom.GetComponent<RectTransform>();
-            roomRect.anchoredPosition = Vector2.zero; // 위치를 초기화
-
-            RoomItem roomItem = newRoom.GetComponent<RoomItem>();
-            roomItem.SetRoomInfo(room.Name, room.PlayerCount, this, PhotonNetwork.IsMasterClient);
-
-            // 디버그 로그 추가
-            Debug.Log($"Room added: {room.Name}, Players: {room.PlayerCount}");
-        }
-
-        // 현재 참가한 방도 추가
+        // 현재 참가한 방 정보를 추가
         if (PhotonNetwork.InRoom)
         {
+            foreach (Transform child in scrollViewContent)
+            {
+                Destroy(child.gameObject);
+            }
+
             GameObject newRoom = Instantiate(roomPrefab, scrollViewContent);
             RectTransform roomRect = newRoom.GetComponent<RectTransform>();
             roomRect.anchoredPosition = Vector2.zero; // 위치를 초기화
@@ -102,6 +89,26 @@ public class LobbyManager : MonoBehaviourPunCallbacks
 
             // 디버그 로그 추가
             Debug.Log($"Current room: {PhotonNetwork.CurrentRoom.Name}, Players: {PhotonNetwork.CurrentRoom.PlayerCount}");
+        }
+        else
+        {
+            foreach (Transform child in scrollViewContent)
+            {
+                Destroy(child.gameObject);
+            }
+
+            foreach (RoomInfo room in cachedRoomList)
+            {
+                GameObject newRoom = Instantiate(roomPrefab, scrollViewContent);
+                RectTransform roomRect = newRoom.GetComponent<RectTransform>();
+                roomRect.anchoredPosition = Vector2.zero; // 위치를 초기화
+
+                RoomItem roomItem = newRoom.GetComponent<RoomItem>();
+                roomItem.SetRoomInfo(room.Name, room.PlayerCount, this, PhotonNetwork.IsMasterClient);
+
+                // 디버그 로그 추가
+                Debug.Log($"Room added: {room.Name}, Players: {room.PlayerCount}");
+            }
         }
     }
 
