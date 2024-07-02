@@ -11,17 +11,19 @@ public class RoomItem : MonoBehaviour
     private string roomName;
     private LobbyManager lobbyManager;
 
-    public void SetRoomInfo(string roomName, int playerCount, LobbyManager manager)
+    public void SetRoomInfo(string roomName, int playerCount, LobbyManager manager, bool isHost)
     {
         this.roomName = roomName;
         roomNameText.text = roomName;
         playerCountText.text = $"{playerCount}/4";
         lobbyManager = manager;
-        joinButton.onClick.RemoveAllListeners(); // 이전에 할당된 모든 리스너 제거
-        joinButton.onClick.AddListener(OnJoinRoomClicked); // 새로운 리스너 추가
+
+        // 호스트인 경우 참여하기 버튼 비활성화
+        joinButton.interactable = !isHost;
     }
 
-    void OnJoinRoomClicked()
+    // 이 메서드는 유니티 에디터에서 joinButton의 OnClick 이벤트에 연결
+    public void OnJoinRoomButtonClicked()
     {
         if (lobbyManager != null)
         {
