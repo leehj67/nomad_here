@@ -60,6 +60,7 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     public override void OnRoomListUpdate(List<RoomInfo> roomList)
     {
         cachedRoomList = new List<RoomInfo>(roomList); // 이 부분에서 새로운 리스트를 할당하여 문제를 방지
+        Debug.Log($"OnRoomListUpdate called with {roomList.Count} rooms.");
         UpdateRoomList();
     }
 
@@ -78,6 +79,9 @@ public class LobbyManager : MonoBehaviourPunCallbacks
 
             RoomItem roomItem = newRoom.GetComponent<RoomItem>();
             roomItem.SetRoomInfo(room.Name, room.PlayerCount, this, PhotonNetwork.IsMasterClient);
+
+            // 디버그 로그 추가
+            Debug.Log($"Room added: {room.Name}, Players: {room.PlayerCount}");
         }
 
         // 현재 참가한 방도 추가
@@ -89,11 +93,23 @@ public class LobbyManager : MonoBehaviourPunCallbacks
 
             RoomItem roomItem = newRoom.GetComponent<RoomItem>();
             roomItem.SetRoomInfo(PhotonNetwork.CurrentRoom.Name, PhotonNetwork.CurrentRoom.PlayerCount, this, PhotonNetwork.IsMasterClient);
+
+            // 디버그 로그 추가
+            Debug.Log($"Current room: {PhotonNetwork.CurrentRoom.Name}, Players: {PhotonNetwork.CurrentRoom.PlayerCount}");
         }
     }
 
     public void JoinRoom(string roomName)
     {
+        if (cachedRoomList == null)
+        {
+            Debug.LogError("cachedRoomList is null");
+            return;
+        }
+
+        // 디버그 로그 추가
+        Debug.Log($"Attempting to join room: {roomName}");
+
         RoomInfo roomInfo = cachedRoomList.Find(r => r.Name == roomName);
         if (roomInfo != null)
         {
@@ -101,7 +117,7 @@ public class LobbyManager : MonoBehaviourPunCallbacks
         }
         else
         {
-            Debug.LogError("RoomInfo is null or room not found");
+            Debug.LogError($"RoomInfo is null or room not found for roomName: {roomName}");
         }
     }
 }
