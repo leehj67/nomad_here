@@ -14,6 +14,8 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     public GameObject roomPrefab;
     public Button startGameButton; // 호스트의 게임 시작 버튼
 
+    private List<RoomInfo> cachedRoomList = new List<RoomInfo>();
+
     private void Start()
     {
         createRoomButton.onClick.AddListener(CreateRoom);
@@ -44,6 +46,7 @@ public class LobbyManager : MonoBehaviourPunCallbacks
 
     public override void OnRoomListUpdate(List<RoomInfo> roomList)
     {
+        cachedRoomList = roomList;
         foreach (Transform child in scrollViewContent)
         {
             Destroy(child.gameObject);
@@ -53,22 +56,20 @@ public class LobbyManager : MonoBehaviourPunCallbacks
         {
             GameObject newRoom = Instantiate(roomPrefab, scrollViewContent);
             RoomItem roomItem = newRoom.GetComponent<RoomItem>();
-            roomItem.roomNameText.text = room.Name;
-            roomItem.playerCountText.text = $"{room.PlayerCount}/4";
-            RoomInfo roomCopy = room; // Capture the current room in a local variable
-            roomItem.joinButton.onClick.AddListener(() => OnJoinRoomClicked(roomCopy));
+            roomItem.SetRoomInfo(room.Name, room.PlayerCount, this);
         }
     }
 
-    void OnJoinRoomClicked(RoomInfo roomInfo)
+    public void JoinRoom(string roomName)
     {
+        RoomInfo roomInfo = cachedRoomList.Find(r => r.Name == roomName);
         if (roomInfo != null)
         {
             PasswordPanel.Instance.OpenPanel(roomInfo);
         }
         else
         {
-            Debug.LogError("RoomInfo is null");
+            Debug.LogError("RoomInfo is null or room not found");
         }
     }
 }
