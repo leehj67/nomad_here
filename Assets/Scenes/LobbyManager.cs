@@ -110,6 +110,11 @@ public class LobbyManager : MonoBehaviourPunCallbacks
         // 디버그 로그 추가
         Debug.Log($"Attempting to join room: {roomName}");
 
+        foreach (var room in cachedRoomList)
+        {
+            Debug.Log($"Room in cachedRoomList: {room.Name}");
+        }
+
         RoomInfo roomInfo = cachedRoomList.Find(r => r.Name == roomName);
         if (roomInfo != null)
         {

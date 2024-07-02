@@ -27,6 +27,7 @@ public class RoomItem : MonoBehaviour
     {
         if (lobbyManager != null)
         {
+            // 디버그 로그 추가
             Debug.Log($"JoinRoomButton clicked for room: {roomName}");
             lobbyManager.JoinRoom(roomName);
         }
