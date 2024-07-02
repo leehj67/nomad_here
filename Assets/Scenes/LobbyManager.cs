@@ -55,12 +55,20 @@ public class LobbyManager : MonoBehaviourPunCallbacks
             RoomItem roomItem = newRoom.GetComponent<RoomItem>();
             roomItem.roomNameText.text = room.Name;
             roomItem.playerCountText.text = $"{room.PlayerCount}/4";
-            roomItem.joinButton.onClick.AddListener(() => OnJoinRoomClicked(room));
+            RoomInfo roomCopy = room; // Capture the current room in a local variable
+            roomItem.joinButton.onClick.AddListener(() => OnJoinRoomClicked(roomCopy));
         }
     }
 
     void OnJoinRoomClicked(RoomInfo roomInfo)
     {
-        PasswordPanel.Instance.OpenPanel(roomInfo);
+        if (roomInfo != null)
+        {
+            PasswordPanel.Instance.OpenPanel(roomInfo);
+        }
+        else
+        {
+            Debug.LogError("RoomInfo is null");
+        }
     }
 }

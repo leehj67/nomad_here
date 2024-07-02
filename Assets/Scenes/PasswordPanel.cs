@@ -27,16 +27,23 @@ public class PasswordPanel : MonoBehaviour
 
     void JoinRoom()
     {
-        string inputPassword = passwordInputField.text;
-        string roomPassword = currentRoomInfo.CustomProperties["password"].ToString();
-        if (inputPassword == roomPassword)
+        if (currentRoomInfo != null)
         {
-            PhotonNetwork.JoinRoom(currentRoomInfo.Name);
-            panel.SetActive(false); // 패널을 비활성화
+            string inputPassword = passwordInputField.text;
+            string roomPassword = currentRoomInfo.CustomProperties["password"].ToString();
+            if (inputPassword == roomPassword)
+            {
+                PhotonNetwork.JoinRoom(currentRoomInfo.Name);
+                panel.SetActive(false); // 패널을 비활성화
+            }
+            else
+            {
+                Debug.Log("Incorrect password");
+            }
         }
         else
         {
-            Debug.Log("Incorrect password");
+            Debug.LogError("currentRoomInfo is null");
         }
     }
 }
