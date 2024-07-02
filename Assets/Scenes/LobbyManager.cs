@@ -20,6 +20,7 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     private void Start()
     {
         createRoomButton.onClick.AddListener(CreateRoom);
+        startGameButton.onClick.AddListener(StartGame); // 게임 시작 버튼 리스너 추가
         startGameButton.gameObject.SetActive(false); // 초기에는 비활성화
     }
 
@@ -42,6 +43,10 @@ public class LobbyManager : MonoBehaviourPunCallbacks
         if (PhotonNetwork.IsMasterClient)
         {
             startGameButton.gameObject.SetActive(true);
+        }
+        else
+        {
+            startGameButton.gameObject.SetActive(false);
         }
 
         // 방 목록을 갱신
@@ -131,6 +136,14 @@ public class LobbyManager : MonoBehaviourPunCallbacks
         else
         {
             Debug.LogError($"RoomInfo is null or room not found for roomName: {roomName}");
+        }
+    }
+
+    void StartGame()
+    {
+        if (PhotonNetwork.IsMasterClient)
+        {
+            PhotonNetwork.LoadLevel("GameScene"); // 여기서 "GameScene"은 실제 게임 씬의 이름이어야 합니다.
         }
     }
 }

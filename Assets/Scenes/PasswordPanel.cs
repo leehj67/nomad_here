@@ -6,7 +6,6 @@ using UnityEngine.UI;
 
 public class PasswordPanel : MonoBehaviour
 {
-    public static PasswordPanel Instance;
     public TMP_InputField passwordInputField;
     public Button joinRoomButton;
     public GameObject panel; // 패널 전체를 나타내는 게임 오브젝트
@@ -14,7 +13,6 @@ public class PasswordPanel : MonoBehaviour
 
     private void Awake()
     {
-        Instance = this;
         joinRoomButton.onClick.AddListener(JoinRoom);
         panel.SetActive(false); // 패널을 비활성화 상태로 시작
     }
