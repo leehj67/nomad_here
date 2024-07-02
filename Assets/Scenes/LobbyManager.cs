@@ -16,11 +16,18 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     public PasswordPanel passwordPanel; // 패스워드 패널
 
     private List<RoomInfo> cachedRoomList = new List<RoomInfo>();
-    private PhotonView photonView;
+    private PhotonView photonView; // PhotonView 객체 선언
 
     private void Start()
     {
-        photonView = GetComponent<PhotonView>();
+        photonView = GetComponent<PhotonView>(); // PhotonView 컴포넌트 가져오기
+
+        if (photonView == null)
+        {
+            Debug.LogError("PhotonView is not attached to the LobbyManager object.");
+            return;
+        }
+
         createRoomButton.onClick.AddListener(CreateRoom);
         startGameButton.onClick.AddListener(StartGame); // 게임 시작 버튼 리스너 추가
         startGameButton.gameObject.SetActive(false); // 초기에는 비활성화
