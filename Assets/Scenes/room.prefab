@@ -266,7 +266,7 @@ GameObject:
   - component: {fileID: 4668943404491883511}
   - component: {fileID: 1687714075437078772}
   - component: {fileID: 7444517384314221048}
-  - component: {fileID: 4758614709216110661}
+  - component: {fileID: -4503120823425877188}
   m_Layer: 5
   m_Name: room
   m_TagString: Untagged
@@ -392,7 +392,7 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
---- !u!114 &4758614709216110661
+--- !u!114 &-4503120823425877188
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -401,11 +401,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 4437426834134779708}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f6929907315d507428f330946934f137, type: 3}
+  m_Script: {fileID: 11500000, guid: dfd3e5a5d212bca48a2346789abc134a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   roomNameText: {fileID: 7444517384314221048}
-  playersText: {fileID: 4201736808756285913}
+  playerCountText: {fileID: 4201736808756285913}
   joinButton: {fileID: 4526991450792191005}
 --- !u!1 &6958264303488786848
 GameObject:
