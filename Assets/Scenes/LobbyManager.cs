@@ -42,19 +42,38 @@ public class LobbyManager : MonoBehaviourPunCallbacks
         {
             startGameButton.gameObject.SetActive(true);
         }
+        UpdateRoomList();
+    }
+
+    public override void OnPlayerEnteredRoom(Player newPlayer)
+    {
+        UpdateRoomList();
+    }
+
+    public override void OnPlayerLeftRoom(Player otherPlayer)
+    {
+        UpdateRoomList();
     }
 
     public override void OnRoomListUpdate(List<RoomInfo> roomList)
     {
-        cachedRoomList = roomList;
+        cachedRoomList = new List<RoomInfo>(roomList); // 이 부분에서 새로운 리스트를 할당하여 문제를 방지
+        UpdateRoomList();
+    }
+
+    void UpdateRoomList()
+    {
         foreach (Transform child in scrollViewContent)
         {
             Destroy(child.gameObject);
         }
 
-        foreach (RoomInfo room in roomList)
+        foreach (RoomInfo room in cachedRoomList)
         {
             GameObject newRoom = Instantiate(roomPrefab, scrollViewContent);
+            RectTransform roomRect = newRoom.GetComponent<RectTransform>();
+            roomRect.anchoredPosition = Vector2.zero; // 위치를 초기화
+
             RoomItem roomItem = newRoom.GetComponent<RoomItem>();
             roomItem.SetRoomInfo(room.Name, room.PlayerCount, this);
         }

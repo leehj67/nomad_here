@@ -17,7 +17,8 @@ public class RoomItem : MonoBehaviour
         roomNameText.text = roomName;
         playerCountText.text = $"{playerCount}/4";
         lobbyManager = manager;
-        joinButton.onClick.AddListener(OnJoinRoomClicked);
+        joinButton.onClick.RemoveAllListeners(); // 이전에 할당된 모든 리스너 제거
+        joinButton.onClick.AddListener(OnJoinRoomClicked); // 새로운 리스너 추가
     }
 
     void OnJoinRoomClicked()
