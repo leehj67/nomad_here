@@ -16,9 +16,11 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     public PasswordPanel passwordPanel; // 패스워드 패널
 
     private List<RoomInfo> cachedRoomList = new List<RoomInfo>();
+    private PhotonView photonView;
 
     private void Start()
     {
+        photonView = GetComponent<PhotonView>();
         createRoomButton.onClick.AddListener(CreateRoom);
         startGameButton.onClick.AddListener(StartGame); // 게임 시작 버튼 리스너 추가
         startGameButton.gameObject.SetActive(false); // 초기에는 비활성화
@@ -77,22 +79,9 @@ public class LobbyManager : MonoBehaviourPunCallbacks
             Destroy(child.gameObject);
         }
 
-        foreach (RoomInfo room in cachedRoomList)
-        {
-            GameObject newRoom = Instantiate(roomPrefab, scrollViewContent);
-            RectTransform roomRect = newRoom.GetComponent<RectTransform>();
-            roomRect.anchoredPosition = Vector2.zero; // 위치를 초기화
-
-            RoomItem roomItem = newRoom.GetComponent<RoomItem>();
-            roomItem.SetRoomInfo(room.Name, room.PlayerCount, this, PhotonNetwork.IsMasterClient);
-
-            // 디버그 로그 추가
-            Debug.Log($"Room added: {room.Name}, Players: {room.PlayerCount}");
-        }
-
-        // 현재 참가한 방도 추가
         if (PhotonNetwork.InRoom)
         {
+            // 현재 참가한 방도 추가
             GameObject newRoom = Instantiate(roomPrefab, scrollViewContent);
             RectTransform roomRect = newRoom.GetComponent<RectTransform>();
             roomRect.anchoredPosition = Vector2.zero; // 위치를 초기화
@@ -102,6 +91,21 @@ public class LobbyManager : MonoBehaviourPunCallbacks
 
             // 디버그 로그 추가
             Debug.Log($"Current room: {PhotonNetwork.CurrentRoom.Name}, Players: {PhotonNetwork.CurrentRoom.PlayerCount}");
+        }
+        else
+        {
+            foreach (RoomInfo room in cachedRoomList)
+            {
+                GameObject newRoom = Instantiate(roomPrefab, scrollViewContent);
+                RectTransform roomRect = newRoom.GetComponent<RectTransform>();
+                roomRect.anchoredPosition = Vector2.zero; // 위치를 초기화
+
+                RoomItem roomItem = newRoom.GetComponent<RoomItem>();
+                roomItem.SetRoomInfo(room.Name, room.PlayerCount, this, PhotonNetwork.IsMasterClient);
+
+                // 디버그 로그 추가
+                Debug.Log($"Room added: {room.Name}, Players: {room.PlayerCount}");
+            }
         }
     }
 
