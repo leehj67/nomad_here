@@ -143,7 +143,7 @@ public class LobbyManager : MonoBehaviourPunCallbacks
         }
     }
 
-    void StartGame()
+    public void StartGame() // public으로 변경
     {
         if (PhotonNetwork.IsMasterClient)
         {
