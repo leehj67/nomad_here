@@ -20,6 +20,9 @@ public class SpaceshipUIManager : MonoBehaviour
 
     private void Start()
     {
+        // GameStateManager의 인스턴스를 설정
+        GameStateManager.Instance.SetSpaceshipUIManager(this);
+
         // 바의 최대 길이를 초기화
         maxBarWidth = foodBar.sizeDelta.x;
         UpdateUI();

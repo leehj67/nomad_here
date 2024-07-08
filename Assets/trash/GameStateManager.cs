@@ -93,6 +93,9 @@ public class GameStateManager : MonoBehaviourPunCallbacks
 
     public PlayerState[] PlayerStates;
 
+    // SpaceshipUIManager 참조
+    private SpaceshipUIManager spaceshipUIManager;
+
     private void Awake()
     {
         if (Instance == null)
@@ -141,7 +144,6 @@ public class GameStateManager : MonoBehaviourPunCallbacks
 
         // 첫 번째 날 패널 표시
         ShowDayPanel();
-        Debug.Log("h");
         ShowTimerPanel();
     }
 
@@ -217,7 +219,6 @@ public class GameStateManager : MonoBehaviourPunCallbacks
     private void OnDayChanged()
     {
         // 날짜가 변경될 때마다 이벤트를 발생시킴
-        Debug.Log("OnDayChanged called.");
         EventManager.Instance.SelectRandomEvent();
         UpdateUI();
     }
@@ -236,15 +237,12 @@ public class GameStateManager : MonoBehaviourPunCallbacks
         {
             dayPanelInstance = Instantiate(dayPanelPrefab, transform);
             dayText = dayPanelInstance.GetComponentInChildren<TMP_Text>();
-
-            
         }
 
         if (dayPanelInstance != null && dayText != null)
         {
             dayPanelInstance.SetActive(true);
             dayText.text = $"Day-{Day}";
-           
 
             // 일정 시간 후 패널 비활성화
             Invoke("HideDayPanel", displayDuration);
@@ -287,12 +285,15 @@ public class GameStateManager : MonoBehaviourPunCallbacks
     // UI 업데이트 메서드
     public void UpdateUI()
     {
-        // SpaceshipUIManager의 메서드를 가정하여 호출 예시를 작성합니다.
-        SpaceshipUIManager spaceshipUIManager = FindObjectOfType<SpaceshipUIManager>();
         if (spaceshipUIManager != null)
         {
             spaceshipUIManager.UpdateUI();
         }
+    }
+
+    public void SetSpaceshipUIManager(SpaceshipUIManager uiManager)
+    {
+        spaceshipUIManager = uiManager;
     }
 
     private void OnContinueButtonClicked()
@@ -302,23 +303,23 @@ public class GameStateManager : MonoBehaviourPunCallbacks
 
     private void EndTimerAndProceed()
     {
-        if (PhotonNetwork.IsMasterClient)
-        {
-            photonView.RPC("RPC_EndTimerAndProceed", RpcTarget.All);
-        }
+        // 타이머 초기화 및 타이머 패널 비활성화
+        photonView.RPC("RPC_EndTimerAndProceed", RpcTarget.All);
     }
 
     [PunRPC]
     private void RPC_EndTimerAndProceed()
     {
-        // 타이머 초기화 및 타이머 패널 비활성화
+        // 타이머 초기화
         timer = 60f;
+
+        // 타이머 패널 비활성화
         if (timerInstance != null)
         {
             timerInstance.SetActive(false);
         }
 
-        // PlayScene으로 넘어가는 로직
+        // 모든 플레이어가 PlayScene으로 이동
         LoadPlayScene();
     }
 
