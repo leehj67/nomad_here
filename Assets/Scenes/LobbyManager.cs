@@ -62,16 +62,18 @@ public class LobbyManager : MonoBehaviourPunCallbacks
         }
 
         // 방 목록을 갱신
-        PhotonNetwork.JoinLobby(); // 방에 참가한 후 로비에 다시 참가하여 방 목록을 갱신
+        UpdateRoomList();
     }
 
     public override void OnPlayerEnteredRoom(Player newPlayer)
     {
+        // 플레이어가 방에 들어올 때 방 목록 갱신
         UpdateRoomList();
     }
 
     public override void OnPlayerLeftRoom(Player otherPlayer)
     {
+        // 플레이어가 방을 나갈 때 방 목록 갱신
         UpdateRoomList();
     }
 
@@ -101,6 +103,20 @@ public class LobbyManager : MonoBehaviourPunCallbacks
 
             // 디버그 로그 추가
             Debug.Log($"Room added: {room.Name}, Players: {room.PlayerCount}");
+        }
+
+        // 현재 참가한 방도 추가
+        if (PhotonNetwork.InRoom)
+        {
+            GameObject currentRoom = Instantiate(roomPrefab, scrollViewContent);
+            RectTransform roomRect = currentRoom.GetComponent<RectTransform>();
+            roomRect.anchoredPosition = new Vector2(0, -roomRect.sizeDelta.y * cachedRoomList.Count); // 위치를 정렬하여 설정
+
+            RoomItem roomItem = currentRoom.GetComponent<RoomItem>();
+            roomItem.SetRoomInfo(PhotonNetwork.CurrentRoom.Name, PhotonNetwork.CurrentRoom.PlayerCount, this, PhotonNetwork.IsMasterClient);
+
+            // 디버그 로그 추가
+            Debug.Log($"Current room: {PhotonNetwork.CurrentRoom.Name}, Players: {PhotonNetwork.CurrentRoom.PlayerCount}");
         }
     }
 
