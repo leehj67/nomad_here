@@ -91,7 +91,7 @@ public class LobbyManager : MonoBehaviourPunCallbacks
             // 현재 참가한 방도 추가
             GameObject newRoom = Instantiate(roomPrefab, scrollViewContent);
             RectTransform roomRect = newRoom.GetComponent<RectTransform>();
-            roomRect.anchoredPosition = Vector2.zero; // 위치를 초기화
+            roomRect.anchoredPosition = new Vector2(0, -roomRect.sizeDelta.y * cachedRoomList.Count); // 위치를 정렬하여 설정
 
             RoomItem roomItem = newRoom.GetComponent<RoomItem>();
             roomItem.SetRoomInfo(PhotonNetwork.CurrentRoom.Name, PhotonNetwork.CurrentRoom.PlayerCount, this, PhotonNetwork.IsMasterClient);
@@ -101,11 +101,12 @@ public class LobbyManager : MonoBehaviourPunCallbacks
         }
         else
         {
-            foreach (RoomInfo room in cachedRoomList)
+            for (int i = 0; i < cachedRoomList.Count; i++)
             {
+                RoomInfo room = cachedRoomList[i];
                 GameObject newRoom = Instantiate(roomPrefab, scrollViewContent);
                 RectTransform roomRect = newRoom.GetComponent<RectTransform>();
-                roomRect.anchoredPosition = Vector2.zero; // 위치를 초기화
+                roomRect.anchoredPosition = new Vector2(0, -roomRect.sizeDelta.y * i); // 위치를 정렬하여 설정
 
                 RoomItem roomItem = newRoom.GetComponent<RoomItem>();
                 roomItem.SetRoomInfo(room.Name, room.PlayerCount, this, PhotonNetwork.IsMasterClient);
