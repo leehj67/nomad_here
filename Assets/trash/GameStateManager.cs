@@ -96,21 +96,12 @@ public class GameStateManager : MonoBehaviourPunCallbacks
     // SpaceshipUIManager 참조
     private SpaceshipUIManager spaceshipUIManager;
 
-    private PhotonView photonView; // PhotonView 참조 추가
-
     private void Awake()
     {
         if (Instance == null)
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
-
-            // PhotonView 컴포넌트 가져오기
-            photonView = GetComponent<PhotonView>();
-            if (photonView == null)
-            {
-                photonView = gameObject.AddComponent<PhotonView>(); // PhotonView가 없으면 추가
-            }
         }
         else
         {
