@@ -151,4 +151,15 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     {
         PhotonNetwork.LoadLevel("GameScene"); // 여기서 "GameScene"은 실제 게임 씬의 이름이어야 합니다.
     }
+
+    public override void OnJoinedLobby()
+    {
+        Debug.Log("Joined Lobby");
+        PhotonNetwork.GetCustomRoomList(TypedLobby.Default, ""); // 방 목록 갱신 요청
+    }
+
+    public override void OnLeftLobby()
+    {
+        Debug.Log("Left Lobby");
+    }
 }
