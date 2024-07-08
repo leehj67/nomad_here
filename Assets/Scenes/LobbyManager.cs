@@ -62,7 +62,7 @@ public class LobbyManager : MonoBehaviourPunCallbacks
         }
 
         // 방 목록을 갱신
-        UpdateRoomList();
+        PhotonNetwork.JoinLobby(); // 방에 참가한 후 로비에 다시 참가하여 방 목록을 갱신
     }
 
     public override void OnPlayerEnteredRoom(Player newPlayer)
@@ -89,34 +89,18 @@ public class LobbyManager : MonoBehaviourPunCallbacks
             Destroy(child.gameObject);
         }
 
-        if (PhotonNetwork.InRoom)
+        for (int i = 0; i < cachedRoomList.Count; i++)
         {
-            // 현재 참가한 방도 추가
+            RoomInfo room = cachedRoomList[i];
             GameObject newRoom = Instantiate(roomPrefab, scrollViewContent);
             RectTransform roomRect = newRoom.GetComponent<RectTransform>();
-            roomRect.anchoredPosition = new Vector2(0, -roomRect.sizeDelta.y * cachedRoomList.Count); // 위치를 정렬하여 설정
+            roomRect.anchoredPosition = new Vector2(0, -roomRect.sizeDelta.y * i); // 위치를 정렬하여 설정
 
             RoomItem roomItem = newRoom.GetComponent<RoomItem>();
-            roomItem.SetRoomInfo(PhotonNetwork.CurrentRoom.Name, PhotonNetwork.CurrentRoom.PlayerCount, this, PhotonNetwork.IsMasterClient);
+            roomItem.SetRoomInfo(room.Name, room.PlayerCount, this, PhotonNetwork.IsMasterClient);
 
             // 디버그 로그 추가
-            Debug.Log($"Current room: {PhotonNetwork.CurrentRoom.Name}, Players: {PhotonNetwork.CurrentRoom.PlayerCount}");
-        }
-        else
-        {
-            for (int i = 0; i < cachedRoomList.Count; i++)
-            {
-                RoomInfo room = cachedRoomList[i];
-                GameObject newRoom = Instantiate(roomPrefab, scrollViewContent);
-                RectTransform roomRect = newRoom.GetComponent<RectTransform>();
-                roomRect.anchoredPosition = new Vector2(0, -roomRect.sizeDelta.y * i); // 위치를 정렬하여 설정
-
-                RoomItem roomItem = newRoom.GetComponent<RoomItem>();
-                roomItem.SetRoomInfo(room.Name, room.PlayerCount, this, PhotonNetwork.IsMasterClient);
-
-                // 디버그 로그 추가
-                Debug.Log($"Room added: {room.Name}, Players: {room.PlayerCount}");
-            }
+            Debug.Log($"Room added: {room.Name}, Players: {room.PlayerCount}");
         }
     }
 
