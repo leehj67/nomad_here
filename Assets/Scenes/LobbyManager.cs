@@ -31,6 +31,9 @@ public class LobbyManager : MonoBehaviourPunCallbacks
         createRoomButton.onClick.AddListener(CreateRoom);
         startGameButton.onClick.AddListener(StartGame); // 게임 시작 버튼 리스너 추가
         startGameButton.gameObject.SetActive(false); // 초기에는 비활성화
+
+        // 로비에 참가
+        PhotonNetwork.JoinLobby();
     }
 
     void CreateRoom()
