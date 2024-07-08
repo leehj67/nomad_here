@@ -115,6 +115,7 @@ public class GameStateManager : MonoBehaviourPunCallbacks
         else
         {
             Destroy(gameObject);
+            return;
         }
     }
 
@@ -329,12 +330,14 @@ public class GameStateManager : MonoBehaviourPunCallbacks
         }
 
         // 모든 플레이어가 PlayScene으로 이동
-        LoadPlayScene();
+        PhotonNetwork.LoadLevel("PlayScene");
     }
 
-    private void LoadPlayScene()
+    private void OnDestroy()
     {
-        // PlayScene으로 넘어가는 로직
-        PhotonNetwork.LoadLevel("PlayScene");
+        if (Instance == this)
+        {
+            Instance = null;
+        }
     }
 }
