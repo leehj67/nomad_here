@@ -25,12 +25,7 @@ public class SpaceshipUIManager : MonoBehaviour
         UpdateUI();
     }
 
-    private void Update()
-    {
-        UpdateUI();
-    }
-
-    private void UpdateUI()
+    public void UpdateUI()
     {
         // 우주선 상태 업데이트
         UpdateBar(foodBar, GameStateManager.Instance.ShipFood, foodValueText);
@@ -76,7 +71,7 @@ public class SpaceshipUIManager : MonoBehaviour
         }
         else
         {
-            statusText.text = "Fucked";
+            statusText.text = "Critical";
         }
     }
 }

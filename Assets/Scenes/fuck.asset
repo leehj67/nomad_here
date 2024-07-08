@@ -15,3 +15,10 @@ MonoBehaviour:
   eventName: f
   description: d
   triggerProbability: 25
+  eventCutsceneUI: {fileID: 3150160734958468246, guid: cd104f135d404d24e9ea6b05a871b0e8, type: 3}
+  foodChange: -5
+  partsChange: 3
+  energyChange: -19
+  healthChange: 0
+  staminaChange: 3
+  hungerChange: 0
