@@ -9,12 +9,11 @@ public class EventManager : MonoBehaviour
     public List<GameEvent> events = new List<GameEvent>();
     public GameEvent currentEvent;
 
-    // 이벤트 발생 확률 (0 - 1 사이의 값)
     [Range(0f, 1f)]
-    public float eventTriggerProbability = 1.0f; // 이벤트 발생 확률을 1로 설정
+    public float eventTriggerProbability = 1.0f;
 
-    public float eventDisplayDuration = 3f; // 이벤트 컷씬을 보여주는 시간
-    public float blinkDuration = 0.5f; // 깜빡이는 주기
+    public float eventDisplayDuration = 3f;
+    public float blinkDuration = 0.5f;
 
     private GameObject currentEventCutscene;
     private CanvasGroup canvasGroup;
@@ -24,7 +23,6 @@ public class EventManager : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject);
         }
         else
         {
@@ -38,7 +36,6 @@ public class EventManager : MonoBehaviour
         if (Random.value <= eventTriggerProbability)
         {
             Debug.Log("Attempting to trigger an event.");
-            // 이벤트가 발생할 확률에 해당하는 경우
             float totalProbability = 0;
             foreach (var gameEvent in events)
             {
@@ -64,14 +61,13 @@ public class EventManager : MonoBehaviour
 
             Debug.Log("No event triggered.");
             currentEvent = null;
-            EndEventCutscene(false); // 이벤트가 발생하지 않을 때에도 EndEventCutscene 호출
+            EndEventCutscene(false);
         }
         else
         {
             Debug.Log("Event not triggered by probability check.");
-            // 이벤트가 발생하지 않을 확률에 해당하는 경우
             currentEvent = null;
-            EndEventCutscene(false); // 이벤트가 발생하지 않을 때에도 EndEventCutscene 호출
+            EndEventCutscene(false);
         }
     }
 
@@ -87,14 +83,12 @@ public class EventManager : MonoBehaviour
             Debug.Log($"Starting event cutscene for event: {gameEvent.eventName}");
             currentEventCutscene = Instantiate(gameEvent.eventCutsceneUI, transform);
             canvasGroup = currentEventCutscene.AddComponent<CanvasGroup>();
-
-            // 시작 깜빡임 코루틴
             StartCoroutine(BlinkEventCutscene());
         }
         else
         {
             Debug.Log("No event cutscene UI found.");
-            EndEventCutscene(true); // 이벤트 컷씬이 없을 때에도 EndEventCutscene 호출
+            EndEventCutscene(true);
         }
     }
 
@@ -104,7 +98,7 @@ public class EventManager : MonoBehaviour
         while (timer < eventDisplayDuration)
         {
             yield return StartCoroutine(FadeInAndOut(canvasGroup, blinkDuration));
-            timer += blinkDuration * 2; // FadeIn + FadeOut 시간
+            timer += blinkDuration * 2;
         }
 
         EndEventCutscene(true);
@@ -112,7 +106,6 @@ public class EventManager : MonoBehaviour
 
     private IEnumerator FadeInAndOut(CanvasGroup canvasGroup, float duration)
     {
-        // Fade In
         float halfDuration = duration / 2;
         for (float t = 0; t < halfDuration; t += Time.deltaTime)
         {
@@ -121,7 +114,6 @@ public class EventManager : MonoBehaviour
         }
         canvasGroup.alpha = 1;
 
-        // Fade Out
         for (float t = 0; t < halfDuration; t += Time.deltaTime)
         {
             canvasGroup.alpha = Mathf.Lerp(1, 0, t / halfDuration);
@@ -138,24 +130,20 @@ public class EventManager : MonoBehaviour
             currentEventCutscene = null;
         }
 
-        // 이벤트가 발생한 경우 스탯 변경 적용
         if (eventOccurred && currentEvent != null)
         {
             ApplyEventEffects(currentEvent);
         }
-        
-        // 날짜 패널을 표시
-        GameStateManager.Instance.ShowDayPanel();
+
+        // GameStateManager.Instance.ShowDayPanel(); // 주석 처리
     }
 
     private void ApplyEventEffects(GameEvent gameEvent)
     {
-        // 우주선 스탯 변경
         GameStateManager.Instance.UpdateShipFood(gameEvent.foodChange);
         GameStateManager.Instance.UpdateShipParts(gameEvent.partsChange);
         GameStateManager.Instance.UpdateShipEnergy(gameEvent.energyChange);
 
-        // 플레이어 스탯 변경 (모든 플레이어에 적용)
         for (int i = 0; i < GameStateManager.Instance.PlayerStates.Length; i++)
         {
             GameStateManager.Instance.UpdatePlayerHealth(i, gameEvent.healthChange);
@@ -166,7 +154,6 @@ public class EventManager : MonoBehaviour
 
     public List<GameEvent> GetIncompleteEvents()
     {
-        // 실제 구현에서는 이벤트의 완료 여부를 관리할 필요가 있음
-        return events; // 이 예제에서는 모든 이벤트를 반환
+        return events;
     }
 }

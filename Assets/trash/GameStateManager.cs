@@ -1,40 +1,24 @@
 using UnityEngine;
 using Photon.Pun;
-using Photon.Realtime;
 using TMPro;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class GameStateManager : MonoBehaviourPunCallbacks
 {
     public static GameStateManager Instance;
 
-    // 우주선 상태
     [SerializeField]
     private int shipFood = 100;
-    public int ShipFood
-    {
-        get { return shipFood; }
-        private set { shipFood = value; }
-    }
+    public int ShipFood { get { return shipFood; } private set { shipFood = value; } }
 
     [SerializeField]
     private int shipParts = 100;
-    public int ShipParts
-    {
-        get { return shipParts; }
-        private set { shipParts = value; }
-    }
+    public int ShipParts { get { return shipParts; } private set { shipParts = value; } }
 
     [SerializeField]
     private int shipEnergy = 100;
-    public int ShipEnergy
-    {
-        get { return shipEnergy; }
-        private set { shipEnergy = value; }
-    }
+    public int ShipEnergy { get { return shipEnergy; } private set { shipEnergy = value; } }
 
-    // 날짜 상태
     [SerializeField]
     private int day = 1;
     public int Day
@@ -47,53 +31,29 @@ public class GameStateManager : MonoBehaviourPunCallbacks
         }
     }
 
-    // 날짜 패널 프리팹
-    public GameObject dayPanelPrefab; // 프리팹 참조
-    private GameObject dayPanelInstance; // 인스턴스화된 패널
-    private TMP_Text dayText; // 날짜를 표시할 TMP 텍스트 컴포넌트
-    public float displayDuration = 3f; // 패널이 사라지는 시간 조정 가능
+    public GameObject dayPanelPrefab;
+    private GameObject dayPanelInstance;
+    private TMP_Text dayText;
+    public float displayDuration = 3f;
 
-    // 타이머 프리팹
-    public GameObject timerPrefab; // 타이머 프리팹 참조
-    private GameObject timerInstance; // 인스턴스화된 타이머
-    private TMP_Text timerText; // 타이머를 표시할 TMP 텍스트 컴포넌트
-    private float timer = 60f; // 60초 타이머
+    public GameObject timerPrefab;
+    private GameObject timerInstance;
+    private TMP_Text timerText;
+    private float timer = 60f;
 
-    // UI 버튼
-    private Button continueButton; // 프리팹 내부의 계속 버튼
+    private Button continueButton;
+    private bool isAdvancingDay = false; // 플래그 변수 추가
 
-    // 플레이어 상태
     [System.Serializable]
     public class PlayerState
     {
-        [SerializeField]
-        private int health = 100;
-        public int Health
-        {
-            get { return health; }
-            set { health = value; }
-        }
-
-        [SerializeField]
-        private int stamina = 100;
-        public int Stamina
-        {
-            get { return stamina; }
-            set { stamina = value; }
-        }
-
-        [SerializeField]
-        private int hunger = 0;
-        public int Hunger
-        {
-            get { return hunger; }
-            set { hunger = value; }
-        }
+        public int Health = 100;
+        public int Stamina = 100;
+        public int Hunger = 0;
     }
 
     public PlayerState[] PlayerStates;
 
-    // SpaceshipUIManager 참조
     private SpaceshipUIManager spaceshipUIManager;
 
     private void Awake()
@@ -103,7 +63,7 @@ public class GameStateManager : MonoBehaviourPunCallbacks
             Instance = this;
             DontDestroyOnLoad(gameObject);
         }
-        else
+        else if (Instance != this)
         {
             Destroy(gameObject);
             return;
@@ -114,17 +74,13 @@ public class GameStateManager : MonoBehaviourPunCallbacks
     {
         if (PhotonNetwork.CurrentRoom != null)
         {
-            // Photon으로부터 플레이어 수를 받아옴
             int playerCount = PhotonNetwork.CurrentRoom.PlayerCount;
-
-            // Initialize player states for the number of players in the room
             PlayerStates = new PlayerState[playerCount];
             for (int i = 0; i < PlayerStates.Length; i++)
             {
                 PlayerStates[i] = new PlayerState();
             }
 
-            // 게임 시작 시 초기화 메서드 호출
             InitializeGame();
         }
         else
@@ -135,15 +91,9 @@ public class GameStateManager : MonoBehaviourPunCallbacks
 
     private void InitializeGame()
     {
-        // Day를 초기화
-        Day = 1;
-
-        // 다른 초기화 작업 수행
         ShipFood = 100;
         ShipParts = 100;
         ShipEnergy = 100;
-
-        // 첫 번째 날 패널 표시
         ShowDayPanel();
         ShowTimerPanel();
     }
@@ -165,7 +115,6 @@ public class GameStateManager : MonoBehaviourPunCallbacks
         }
     }
 
-    // Methods to update ship state
     public void UpdateShipFood(int amount)
     {
         ShipFood += amount;
@@ -184,7 +133,6 @@ public class GameStateManager : MonoBehaviourPunCallbacks
         UpdateUI();
     }
 
-    // Methods to update player state
     public void UpdatePlayerHealth(int playerIndex, int amount)
     {
         if (IsValidPlayerIndex(playerIndex))
@@ -219,19 +167,23 @@ public class GameStateManager : MonoBehaviourPunCallbacks
 
     private void OnDayChanged()
     {
-        // 날짜가 변경될 때마다 이벤트를 발생시킴
         EventManager.Instance.SelectRandomEvent();
         UpdateUI();
     }
 
-    // 게임 내 다른 로직에서 Day 프로퍼티를 변경할 수 있는 메서드 추가
     public void AdvanceDay()
     {
+        if (isAdvancingDay) return; // 중복 호출 방지
+
+        Debug.Log("AdvanceDay called");
+        isAdvancingDay = true; // 플래그 설정
         Day++;
-        OnDayChanged(); // Day가 변경되면 OnDayChanged를 호출
+        OnDayChanged();
+        ShowDayPanel(); // 날자가 변경될 때마다 DayPanel 표시
+        ShowTimerPanel(); // 타이머도 다시 표시
+        isAdvancingDay = false; // 플래그 해제
     }
 
-    // 날짜 패널 표시 메서드
     public void ShowDayPanel()
     {
         if (dayPanelInstance == null)
@@ -244,8 +196,6 @@ public class GameStateManager : MonoBehaviourPunCallbacks
         {
             dayPanelInstance.SetActive(true);
             dayText.text = $"Day-{Day}";
-
-            // 일정 시간 후 패널 비활성화
             Invoke("HideDayPanel", displayDuration);
         }
         else
@@ -261,13 +211,13 @@ public class GameStateManager : MonoBehaviourPunCallbacks
             timerInstance = Instantiate(timerPrefab, transform);
             timerText = timerInstance.GetComponentInChildren<TMP_Text>();
             continueButton = timerInstance.GetComponentInChildren<Button>();
-            continueButton.onClick.AddListener(OnContinueButtonClicked); // 버튼 클릭 이벤트 등록
+            continueButton.onClick.AddListener(OnContinueButtonClicked);
         }
 
         if (timerInstance != null)
         {
             timerInstance.SetActive(true);
-            timerText.text = $"Time remaining: {timer} seconds"; // 초기 타이머 값 표시
+            timerText.text = $"Time remaining: {timer} seconds";
         }
         else
         {
@@ -283,7 +233,6 @@ public class GameStateManager : MonoBehaviourPunCallbacks
         }
     }
 
-    // UI 업데이트 메서드
     public void UpdateUI()
     {
         if (spaceshipUIManager != null)
@@ -304,23 +253,19 @@ public class GameStateManager : MonoBehaviourPunCallbacks
 
     private void EndTimerAndProceed()
     {
-        // 타이머 초기화 및 타이머 패널 비활성화
         photonView.RPC("RPC_EndTimerAndProceed", RpcTarget.All);
     }
 
     [PunRPC]
     private void RPC_EndTimerAndProceed()
     {
-        // 타이머 초기화
         timer = 60f;
 
-        // 타이머 패널 비활성화
         if (timerInstance != null)
         {
             timerInstance.SetActive(false);
         }
 
-        // 모든 플레이어가 PlayScene으로 이동
         PhotonNetwork.LoadLevel("PlayScene");
     }
 

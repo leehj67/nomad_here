@@ -5,6 +5,8 @@ using UnityEngine.UI;
 public class HostRoomManager : MonoBehaviourPunCallbacks
 {
     public Button startGameButton;
+    public GameObject gameStateManagerPrefab;
+    public GameObject eventManagerPrefab;
 
     private void Start()
     {
@@ -15,7 +17,19 @@ public class HostRoomManager : MonoBehaviourPunCallbacks
     {
         if (PhotonNetwork.IsMasterClient)
         {
+            InstantiateSingleton(gameStateManagerPrefab, GameStateManager.Instance);
+            InstantiateSingleton(eventManagerPrefab, EventManager.Instance);
+
             PhotonNetwork.LoadLevel("GameScene");
+        }
+    }
+
+    private void InstantiateSingleton(GameObject prefab, MonoBehaviour instance)
+    {
+        if (instance == null)
+        {
+            GameObject manager = PhotonNetwork.Instantiate(prefab.name, Vector3.zero, Quaternion.identity);
+            DontDestroyOnLoad(manager);
         }
     }
 
