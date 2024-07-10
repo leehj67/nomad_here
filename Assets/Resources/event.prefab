@@ -48,6 +48,7 @@ MonoBehaviour:
   events:
   - {fileID: 11400000, guid: 4716c5d2870bf394a8a7e854723fde49, type: 2}
   - {fileID: 11400000, guid: 1d25f799831b7b14fa75685547390296, type: 2}
+  - {fileID: 11400000, guid: c756915671ebaa549b64f80654d4b0d7, type: 2}
   currentEvent: {fileID: 0}
   eventTriggerProbability: 1
   eventDisplayDuration: 3
