@@ -60,7 +60,7 @@ public class GameStateManager : MonoBehaviourPunCallbacks
             Instance = this;
             DontDestroyOnLoad(gameObject);
         }
-        else
+        else if (Instance != this)
         {
             Destroy(gameObject);
             return;
@@ -179,27 +179,53 @@ public class GameStateManager : MonoBehaviourPunCallbacks
         if (PhotonNetwork.IsMasterClient)
         {
             string eventId = EventManager.Instance.SelectRandomEvent();  // 마스터 클라이언트에서 이벤트 선택
-            ApplyEventEffects(eventId);  // 선택된 이벤트의 효과 적용
+            photonView.RPC("ApplyEventToAllClients", RpcTarget.All, eventId); // 모든 클라이언트에 이벤트 적용
         }
         UpdateUI();
         ShowDayPanel();
         ShowTimerPanel();
     }
 
-    public void ApplyEventEffects(string eventId)
+    [PunRPC]
+    public void ApplyEventToAllClients(string eventId)
     {
         GameEvent gameEvent = EventManager.Instance.GetEventById(eventId);
         if (gameEvent != null)
         {
-            UpdateShipFood(gameEvent.foodChange);
-            UpdateShipParts(gameEvent.partsChange);
-            UpdateShipEnergy(gameEvent.energyChange);
-            for (int i = 0; i < PlayerStates.Length; i++)
-            {
-                UpdatePlayerHealth(i, gameEvent.healthChange);
-                UpdatePlayerStamina(i, gameEvent.staminaChange);
-                UpdatePlayerHunger(i, gameEvent.hungerChange);
-            }
+            // 이벤트 효과 적용
+            ApplyEventEffects(gameEvent);
+        }
+    }
+
+    public void ApplyEventEffects(GameEvent gameEvent)
+    {
+        // 이벤트 효과 동기화
+        photonView.RPC("SyncStats", RpcTarget.All, gameEvent.foodChange, gameEvent.partsChange, gameEvent.energyChange);
+
+        for (int i = 0; i < PlayerStates.Length; i++)
+        {
+            photonView.RPC("SyncPlayerStats", RpcTarget.All, i, gameEvent.healthChange, gameEvent.staminaChange, gameEvent.hungerChange);
+        }
+    }
+
+    [PunRPC]
+    public void SyncStats(int foodChange, int partsChange, int energyChange)
+    {
+        ShipFood += foodChange;
+        ShipParts += partsChange;
+        ShipEnergy += energyChange;
+        UpdateUI();
+    }
+
+    [PunRPC]
+    public void SyncPlayerStats(int playerIndex, int healthChange, int staminaChange, int hungerChange)
+    {
+        if (IsValidPlayerIndex(playerIndex))
+        {
+            PlayerStates[playerIndex].Health += healthChange;
+            PlayerStates[playerIndex].Stamina += staminaChange;
+            PlayerStates[playerIndex].Hunger += hungerChange;
+            UpdateUI();
         }
     }
 
@@ -254,7 +280,7 @@ public class GameStateManager : MonoBehaviourPunCallbacks
 
     private void OnContinueButtonClicked()
     {
-         EndTimerAndProceed();
+        EndTimerAndProceed();
     }
 
     private void EndTimerAndProceed()

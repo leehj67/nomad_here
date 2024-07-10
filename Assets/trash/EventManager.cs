@@ -53,8 +53,6 @@ public class EventManager : MonoBehaviourPunCallbacks
             }
 
             float randomPoint = Random.value * totalProbability;
-            Debug.Log($"Total Probability: {totalProbability}, Random Point: {randomPoint}");
-
             foreach (var gameEvent in events)
             {
                 if (randomPoint < gameEvent.triggerProbability)
@@ -62,10 +60,7 @@ public class EventManager : MonoBehaviourPunCallbacks
                     currentEvent = gameEvent;
                     return currentEvent.eventName; // 이벤트 이름 반환
                 }
-                else
-                {
-                    randomPoint -= gameEvent.triggerProbability;
-                }
+                randomPoint -= gameEvent.triggerProbability;
             }
         }
         Debug.Log("No event triggered.");
@@ -107,7 +102,7 @@ public class EventManager : MonoBehaviourPunCallbacks
             timer += blinkDuration * 2;
         }
 
-        // Optionally end the cutscene and handle the aftermath here
+        EndEventCutscene(true);
     }
 
     private IEnumerator FadeInAndOut(CanvasGroup canvasGroup, float duration)
@@ -127,31 +122,31 @@ public class EventManager : MonoBehaviourPunCallbacks
         }
         canvasGroup.alpha = 0;
     }
-public GameEvent GetEventById(string eventId)
-{
-    // events 리스트에서 eventId와 일치하는 이벤트를 찾습니다.
-    foreach (GameEvent gameEvent in events)
+
+    private void EndEventCutscene(bool eventOccurred)
     {
-        if (gameEvent.eventName == eventId)
+        if (currentEventCutscene != null)
         {
-            return gameEvent;  // 일치하는 이벤트를 반환
+            Destroy(currentEventCutscene);
+            currentEventCutscene = null;
+        }
+
+        if (eventOccurred && currentEvent != null)
+        {
+            // 필요한 경우 이벤트 효과를 적용합니다.
         }
     }
-    return null;  // 일치하는 이벤트가 없으면 null 반환
-}
 
-    public void SetEventById(string eventId)
+    public GameEvent GetEventById(string eventId)
     {
-        GameEvent gameEvent = events.Find(e => e.eventName == eventId);
-        if (gameEvent != null)
+        // events 리스트에서 eventId와 일치하는 이벤트를 찾습니다.
+        foreach (GameEvent gameEvent in events)
         {
-            currentEvent = gameEvent;
-            // Apply effects or handle the event specifics here
-            Debug.Log("Event set: " + currentEvent.eventName);
+            if (gameEvent.eventName == eventId)
+            {
+                return gameEvent;  // 일치하는 이벤트를 반환
+            }
         }
-        else
-        {
-            Debug.LogError("Event not found: " + eventId);
-        }
+        return null;  // 일치하는 이벤트가 없으면 null 반환
     }
 }
