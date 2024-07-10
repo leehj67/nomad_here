@@ -10,15 +10,12 @@ public class GameStateManager : MonoBehaviourPunCallbacks
     [SerializeField]
     private int shipFood = 100;
     public int ShipFood { get { return shipFood; } private set { shipFood = value; } }
-
     [SerializeField]
     private int shipParts = 100;
     public int ShipParts { get { return shipParts; } private set { shipParts = value; } }
-
     [SerializeField]
     private int shipEnergy = 100;
     public int ShipEnergy { get { return shipEnergy; } private set { shipEnergy = value; } }
-
     [SerializeField]
     private int day = 1;
     public int Day
@@ -63,7 +60,7 @@ public class GameStateManager : MonoBehaviourPunCallbacks
             Instance = this;
             DontDestroyOnLoad(gameObject);
         }
-        else if (Instance != this)
+        else
         {
             Destroy(gameObject);
             return;
@@ -172,7 +169,6 @@ public class GameStateManager : MonoBehaviourPunCallbacks
         Debug.Log("AdvanceDay called");
         isAdvancingDay = true;
         Day++;
-        photonView.RPC("OnDayChanged", RpcTarget.All, Day);
         isAdvancingDay = false;
     }
 
@@ -180,10 +176,31 @@ public class GameStateManager : MonoBehaviourPunCallbacks
     private void OnDayChanged(int newDay)
     {
         day = newDay;
-        EventManager.Instance.SelectRandomEvent();
+        if (PhotonNetwork.IsMasterClient)
+        {
+            string eventId = EventManager.Instance.SelectRandomEvent();  // 마스터 클라이언트에서 이벤트 선택
+            ApplyEventEffects(eventId);  // 선택된 이벤트의 효과 적용
+        }
         UpdateUI();
         ShowDayPanel();
         ShowTimerPanel();
+    }
+
+    public void ApplyEventEffects(string eventId)
+    {
+        GameEvent gameEvent = EventManager.Instance.GetEventById(eventId);
+        if (gameEvent != null)
+        {
+            UpdateShipFood(gameEvent.foodChange);
+            UpdateShipParts(gameEvent.partsChange);
+            UpdateShipEnergy(gameEvent.energyChange);
+            for (int i = 0; i < PlayerStates.Length; i++)
+            {
+                UpdatePlayerHealth(i, gameEvent.healthChange);
+                UpdatePlayerStamina(i, gameEvent.staminaChange);
+                UpdatePlayerHunger(i, gameEvent.hungerChange);
+            }
+        }
     }
 
     public void ShowDayPanel()
@@ -237,7 +254,7 @@ public class GameStateManager : MonoBehaviourPunCallbacks
 
     private void OnContinueButtonClicked()
     {
-        EndTimerAndProceed();
+         EndTimerAndProceed();
     }
 
     private void EndTimerAndProceed()
@@ -255,7 +272,7 @@ public class GameStateManager : MonoBehaviourPunCallbacks
             timerInstance.SetActive(false);
         }
 
-        PhotonNetwork.LoadLevel("PlayScene"); // C 씬으로 전환
+        PhotonNetwork.LoadLevel("PlayScene"); // 다음 씬으로 전환
     }
 
     public void UpdateUI()

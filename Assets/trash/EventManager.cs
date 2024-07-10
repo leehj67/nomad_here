@@ -32,13 +32,20 @@ public class EventManager : MonoBehaviourPunCallbacks
         }
     }
 
+    public void TryTriggerRandomEvent()
+    {
+        if (PhotonNetwork.IsMasterClient)
+        {
+            photonView.RPC("SelectRandomEvent", RpcTarget.All);
+        }
+    }
+
     [PunRPC]
-    public void SelectRandomEvent()
+    public string SelectRandomEvent()
     {
         Debug.Log("SelectRandomEvent called.");
         if (Random.value <= eventTriggerProbability)
         {
-            Debug.Log("Attempting to trigger an event.");
             float totalProbability = 0;
             foreach (var gameEvent in events)
             {
@@ -53,25 +60,26 @@ public class EventManager : MonoBehaviourPunCallbacks
                 if (randomPoint < gameEvent.triggerProbability)
                 {
                     currentEvent = gameEvent;
-                    StartEventCutscene(currentEvent);
-                    return;
+                    return currentEvent.eventName; // 이벤트 이름 반환
                 }
                 else
                 {
                     randomPoint -= gameEvent.triggerProbability;
                 }
             }
+        }
+        Debug.Log("No event triggered.");
+        return null; // 이벤트가 트리거되지 않은 경우 null 반환
+    }
 
-            Debug.Log("No event triggered.");
-            currentEvent = null;
-            EndEventCutscene(false);
-        }
-        else
-        {
-            Debug.Log("Event not triggered by probability check.");
-            currentEvent = null;
-            EndEventCutscene(false);
-        }
+    [PunRPC]
+    public void StartEventCutsceneRPC(string eventName)
+    {
+        GameEvent gameEvent = events.Find(e => e.eventName == eventName);
+        if (gameEvent == null) return;
+
+        currentEvent = gameEvent;
+        StartEventCutscene(currentEvent);
     }
 
     private void StartEventCutscene(GameEvent gameEvent)
@@ -86,13 +94,7 @@ public class EventManager : MonoBehaviourPunCallbacks
             Debug.Log($"Starting event cutscene for event: {gameEvent.eventName}");
             currentEventCutscene = Instantiate(gameEvent.eventCutsceneUI, transform);
             canvasGroup = currentEventCutscene.AddComponent<CanvasGroup>();
-
             StartCoroutine(BlinkEventCutscene());
-        }
-        else
-        {
-            Debug.Log("No event cutscene UI found.");
-            EndEventCutscene(true);
         }
     }
 
@@ -105,7 +107,7 @@ public class EventManager : MonoBehaviourPunCallbacks
             timer += blinkDuration * 2;
         }
 
-        EndEventCutscene(true);
+        // Optionally end the cutscene and handle the aftermath here
     }
 
     private IEnumerator FadeInAndOut(CanvasGroup canvasGroup, float duration)
@@ -125,39 +127,31 @@ public class EventManager : MonoBehaviourPunCallbacks
         }
         canvasGroup.alpha = 0;
     }
-
-    private void EndEventCutscene(bool eventOccurred)
+public GameEvent GetEventById(string eventId)
+{
+    // events 리스트에서 eventId와 일치하는 이벤트를 찾습니다.
+    foreach (GameEvent gameEvent in events)
     {
-        if (currentEventCutscene != null)
+        if (gameEvent.eventName == eventId)
         {
-            Destroy(currentEventCutscene);
-            currentEventCutscene = null;
-        }
-
-        if (eventOccurred && currentEvent != null)
-        {
-            ApplyEventEffects(currentEvent);
-        }
-
-        GameStateManager.Instance.ShowDayPanel();
-    }
-
-    private void ApplyEventEffects(GameEvent gameEvent)
-    {
-        GameStateManager.Instance.UpdateShipFood(gameEvent.foodChange);
-        GameStateManager.Instance.UpdateShipParts(gameEvent.partsChange);
-        GameStateManager.Instance.UpdateShipEnergy(gameEvent.energyChange);
-
-        for (int i = 0; i < GameStateManager.Instance.PlayerStates.Length; i++)
-        {
-            GameStateManager.Instance.UpdatePlayerHealth(i, gameEvent.healthChange);
-            GameStateManager.Instance.UpdatePlayerStamina(i, gameEvent.staminaChange);
-            GameStateManager.Instance.UpdatePlayerHunger(i, gameEvent.hungerChange);
+            return gameEvent;  // 일치하는 이벤트를 반환
         }
     }
+    return null;  // 일치하는 이벤트가 없으면 null 반환
+}
 
-    public List<GameEvent> GetIncompleteEvents()
+    public void SetEventById(string eventId)
     {
-        return events;
+        GameEvent gameEvent = events.Find(e => e.eventName == eventId);
+        if (gameEvent != null)
+        {
+            currentEvent = gameEvent;
+            // Apply effects or handle the event specifics here
+            Debug.Log("Event set: " + currentEvent.eventName);
+        }
+        else
+        {
+            Debug.LogError("Event not found: " + eventId);
+        }
     }
 }
