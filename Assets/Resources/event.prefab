@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2167890785974806951}
   - component: {fileID: 6223081129052383624}
-  - component: {fileID: 4760437779246012096}
+  - component: {fileID: 6229951058138318253}
   m_Layer: 0
   m_Name: event
   m_TagString: Untagged
@@ -52,7 +52,7 @@ MonoBehaviour:
   eventTriggerProbability: 1
   eventDisplayDuration: 3
   blinkDuration: 0.5
---- !u!114 &4760437779246012096
+--- !u!114 &6229951058138318253
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

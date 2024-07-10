@@ -1,8 +1,9 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using Photon.Pun;
 
-public class EventManager : MonoBehaviour
+public class EventManager : MonoBehaviourPunCallbacks
 {
     public static EventManager Instance;
 
@@ -23,6 +24,7 @@ public class EventManager : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
+            DontDestroyOnLoad(gameObject);
         }
         else
         {
@@ -30,6 +32,7 @@ public class EventManager : MonoBehaviour
         }
     }
 
+    [PunRPC]
     public void SelectRandomEvent()
     {
         Debug.Log("SelectRandomEvent called.");
@@ -83,6 +86,7 @@ public class EventManager : MonoBehaviour
             Debug.Log($"Starting event cutscene for event: {gameEvent.eventName}");
             currentEventCutscene = Instantiate(gameEvent.eventCutsceneUI, transform);
             canvasGroup = currentEventCutscene.AddComponent<CanvasGroup>();
+
             StartCoroutine(BlinkEventCutscene());
         }
         else
@@ -135,7 +139,7 @@ public class EventManager : MonoBehaviour
             ApplyEventEffects(currentEvent);
         }
 
-        // GameStateManager.Instance.ShowDayPanel(); // 주석 처리
+        GameStateManager.Instance.ShowDayPanel();
     }
 
     private void ApplyEventEffects(GameEvent gameEvent)

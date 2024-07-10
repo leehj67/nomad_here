@@ -27,7 +27,7 @@ public class GameStateManager : MonoBehaviourPunCallbacks
         set
         {
             day = value;
-            OnDayChanged();
+            photonView.RPC("OnDayChanged", RpcTarget.All, day);
         }
     }
 
@@ -42,7 +42,7 @@ public class GameStateManager : MonoBehaviourPunCallbacks
     private float timer = 60f;
 
     private Button continueButton;
-    private bool isAdvancingDay = false; // 플래그 변수 추가
+    private bool isAdvancingDay = false;
 
     [System.Serializable]
     public class PlayerState
@@ -165,23 +165,25 @@ public class GameStateManager : MonoBehaviourPunCallbacks
         return index >= 0 && index < PlayerStates.Length;
     }
 
-    private void OnDayChanged()
-    {
-        EventManager.Instance.SelectRandomEvent();
-        UpdateUI();
-    }
-
     public void AdvanceDay()
     {
-        if (isAdvancingDay) return; // 중복 호출 방지
+        if (isAdvancingDay) return;
 
         Debug.Log("AdvanceDay called");
-        isAdvancingDay = true; // 플래그 설정
+        isAdvancingDay = true;
         Day++;
-        OnDayChanged();
-        ShowDayPanel(); // 날자가 변경될 때마다 DayPanel 표시
-        ShowTimerPanel(); // 타이머도 다시 표시
-        isAdvancingDay = false; // 플래그 해제
+        photonView.RPC("OnDayChanged", RpcTarget.All, Day);
+        isAdvancingDay = false;
+    }
+
+    [PunRPC]
+    private void OnDayChanged(int newDay)
+    {
+        day = newDay;
+        EventManager.Instance.SelectRandomEvent();
+        UpdateUI();
+        ShowDayPanel();
+        ShowTimerPanel();
     }
 
     public void ShowDayPanel()
@@ -204,7 +206,7 @@ public class GameStateManager : MonoBehaviourPunCallbacks
         }
     }
 
-    private void ShowTimerPanel()
+    public void ShowTimerPanel()
     {
         if (timerInstance == null)
         {
@@ -233,19 +235,6 @@ public class GameStateManager : MonoBehaviourPunCallbacks
         }
     }
 
-    public void UpdateUI()
-    {
-        if (spaceshipUIManager != null)
-        {
-            spaceshipUIManager.UpdateUI();
-        }
-    }
-
-    public void SetSpaceshipUIManager(SpaceshipUIManager uiManager)
-    {
-        spaceshipUIManager = uiManager;
-    }
-
     private void OnContinueButtonClicked()
     {
         EndTimerAndProceed();
@@ -266,14 +255,19 @@ public class GameStateManager : MonoBehaviourPunCallbacks
             timerInstance.SetActive(false);
         }
 
-        PhotonNetwork.LoadLevel("PlayScene");
+        PhotonNetwork.LoadLevel("PlayScene"); // C 씬으로 전환
     }
 
-    private void OnDestroy()
+    public void UpdateUI()
     {
-        if (Instance == this)
+        if (spaceshipUIManager != null)
         {
-            Instance = null;
+            spaceshipUIManager.UpdateUI();
         }
+    }
+
+    public void SetSpaceshipUIManager(SpaceshipUIManager uiManager)
+    {
+        spaceshipUIManager = uiManager;
     }
 }

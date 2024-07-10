@@ -16,7 +16,7 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     public PasswordPanel passwordPanel; // 패스워드 패널
 
     private List<RoomInfo> cachedRoomList = new List<RoomInfo>();
-    private PhotonView photonView; // PhotonView 객체 선언
+    private new PhotonView photonView; // PhotonView 객체 선언
 
     private void Start()
     {

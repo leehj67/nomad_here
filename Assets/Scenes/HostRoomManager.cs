@@ -17,19 +17,17 @@ public class HostRoomManager : MonoBehaviourPunCallbacks
     {
         if (PhotonNetwork.IsMasterClient)
         {
-            InstantiateSingleton(gameStateManagerPrefab, GameStateManager.Instance);
-            InstantiateSingleton(eventManagerPrefab, EventManager.Instance);
+            // PhotonNetwork를 통해 프리팹 인스턴스화
+            if (GameStateManager.Instance == null)
+            {
+                PhotonNetwork.Instantiate(gameStateManagerPrefab.name, Vector3.zero, Quaternion.identity);
+            }
+            if (EventManager.Instance == null)
+            {
+                PhotonNetwork.Instantiate(eventManagerPrefab.name, Vector3.zero, Quaternion.identity);
+            }
 
             PhotonNetwork.LoadLevel("GameScene");
-        }
-    }
-
-    private void InstantiateSingleton(GameObject prefab, MonoBehaviour instance)
-    {
-        if (instance == null)
-        {
-            GameObject manager = PhotonNetwork.Instantiate(prefab.name, Vector3.zero, Quaternion.identity);
-            DontDestroyOnLoad(manager);
         }
     }
 

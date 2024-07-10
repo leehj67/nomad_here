@@ -6,6 +6,7 @@ public class PlaySceneManager : MonoBehaviourPunCallbacks
 {
     public float playDuration = 60f;
     private float timer;
+    private bool isReturningToGameScene = false;
 
     private void Start()
     {
@@ -15,28 +16,36 @@ public class PlaySceneManager : MonoBehaviourPunCallbacks
     private void Update()
     {
         timer -= Time.deltaTime;
-        if (timer <= 0)
+        if (timer <= 0 && !isReturningToGameScene)
         {
+            isReturningToGameScene = true;
             ReturnToGameScene();
         }
     }
 
-    private void ReturnToGameScene()
+   private void ReturnToGameScene()
+{
+    Debug.Log("Returning to GameScene...");
+    SceneManager.LoadScene("GameScene");
+    SceneManager.sceneLoaded += OnGameSceneLoaded;
+}
+
+private void OnGameSceneLoaded(Scene scene, LoadSceneMode mode)
+{
+    if (scene.name == "GameScene")
     {
+        Debug.Log("GameScene loaded, advancing day...");
         if (GameStateManager.Instance != null)
         {
             GameStateManager.Instance.AdvanceDay();
         }
         else
         {
-            Debug.LogError("PlaySceneManager: GameStateManager instance not found");
+            Debug.LogError("GameStateManager instance is not found!");
         }
 
-        PhotonNetwork.LoadLevel("GameScene");
+        SceneManager.sceneLoaded -= OnGameSceneLoaded;
     }
+}
 
-    public override void OnJoinedRoom()
-    {
-        Debug.Log("PlaySceneManager: Successfully joined the room");
-    }
 }

@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1176331560607006365}
   - component: {fileID: 655126656904917263}
-  - component: {fileID: 2102792267177015374}
+  - component: {fileID: 744225659892055469}
   m_Layer: 0
   m_Name: GameStateManager
   m_TagString: Untagged
@@ -53,7 +53,7 @@ MonoBehaviour:
   displayDuration: 5
   timerPrefab: {fileID: 516923737714492658, guid: 8875b7f17fb27304988cb47bfeb52296, type: 3}
   PlayerStates: []
---- !u!114 &2102792267177015374
+--- !u!114 &744225659892055469
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

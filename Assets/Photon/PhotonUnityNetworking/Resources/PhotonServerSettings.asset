@@ -41,6 +41,9 @@ MonoBehaviour:
   - RespawnSpaceship
   - LoadGameScene
   - RPC_EndTimerAndProceed
+  - RPC_ReturnToGameScene
+  - OnDayChanged
+  - SelectRandomEvent
   DisableAutoOpenWizard: 1
   ShowSettings: 0
   DevRegionSetOnce: 1
