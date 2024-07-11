@@ -8,6 +8,14 @@ TagManager:
   - Door
   - wall
   - Bullet
+  - Door_01
+  - Door_02
+  - Door_03
+  - Door_04
+  - Door_05
+  - Door_06
+  - Door_07
+  - Door_08
   layers:
   - Default
   - TransparentFX
