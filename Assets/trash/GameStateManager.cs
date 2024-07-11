@@ -63,7 +63,6 @@ public class GameStateManager : MonoBehaviourPunCallbacks
         else if (Instance != this)
         {
             Destroy(gameObject);
-            return;
         }
     }
 
@@ -173,18 +172,19 @@ public class GameStateManager : MonoBehaviourPunCallbacks
     }
 
     [PunRPC]
-    private void OnDayChanged(int newDay)
+private void OnDayChanged(int newDay)
+{
+    day = newDay;
+    if (PhotonNetwork.IsMasterClient)
     {
-        day = newDay;
-        if (PhotonNetwork.IsMasterClient)
-        {
-            string eventId = EventManager.Instance.SelectRandomEvent();  // 마스터 클라이언트에서 이벤트 선택
-            photonView.RPC("ApplyEventToAllClients", RpcTarget.All, eventId); // 모든 클라이언트에 이벤트 적용
-        }
-        UpdateUI();
-        ShowDayPanel();
-        ShowTimerPanel();
+        EventManager.Instance.SelectRandomEvent(); // 이벤트 선택
+        // 결과 eventId를 사용하려 했으나, SelectRandomEvent는 void를 반환하므로 다음 RPC 호출 부분 수정 필요
     }
+    UpdateUI();
+    ShowDayPanel();
+    ShowTimerPanel();
+}
+
 
     [PunRPC]
     public void ApplyEventToAllClients(string eventId)
@@ -280,7 +280,7 @@ public class GameStateManager : MonoBehaviourPunCallbacks
 
     private void OnContinueButtonClicked()
     {
-        EndTimerAndProceed();
+          EndTimerAndProceed(); // 메서드 이름 수정
     }
 
     private void EndTimerAndProceed()

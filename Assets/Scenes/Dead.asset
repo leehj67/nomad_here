@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   eventName: dead
   description: bitch
-  triggerProbability: 25
+  triggerProbability: 40
   eventCutsceneUI: {fileID: 3150160734958468246, guid: cd104f135d404d24e9ea6b05a871b0e8, type: 3}
   foodChange: 0
   partsChange: 0

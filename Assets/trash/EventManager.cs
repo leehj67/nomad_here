@@ -1,18 +1,16 @@
 using UnityEngine;
+using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
-using Photon.Pun;
 
 public class EventManager : MonoBehaviourPunCallbacks
 {
     public static EventManager Instance;
-
     public List<GameEvent> events = new List<GameEvent>();
     public GameEvent currentEvent;
 
     [Range(0f, 1f)]
     public float eventTriggerProbability = 1.0f;
-
     public float eventDisplayDuration = 3f;
     public float blinkDuration = 0.5f;
 
@@ -41,7 +39,7 @@ public class EventManager : MonoBehaviourPunCallbacks
     }
 
     [PunRPC]
-    public string SelectRandomEvent()
+    public void SelectRandomEvent()
     {
         Debug.Log("SelectRandomEvent called.");
         if (Random.value <= eventTriggerProbability)
@@ -58,13 +56,14 @@ public class EventManager : MonoBehaviourPunCallbacks
                 if (randomPoint < gameEvent.triggerProbability)
                 {
                     currentEvent = gameEvent;
-                    return currentEvent.eventName; // 이벤트 이름 반환
+                    photonView.RPC("StartEventCutsceneRPC", RpcTarget.All, currentEvent.eventName);
+                    photonView.RPC("ApplyEventEffects", RpcTarget.All, currentEvent.eventName);
+                    return;
                 }
                 randomPoint -= gameEvent.triggerProbability;
             }
         }
         Debug.Log("No event triggered.");
-        return null; // 이벤트가 트리거되지 않은 경우 null 반환
     }
 
     [PunRPC]
@@ -133,20 +132,30 @@ public class EventManager : MonoBehaviourPunCallbacks
 
         if (eventOccurred && currentEvent != null)
         {
-            // 필요한 경우 이벤트 효과를 적용합니다.
+            Debug.Log("Event ended successfully.");
+        }
+    }
+
+    [PunRPC]
+    public void ApplyEventEffects(string eventName)
+    {
+        GameEvent gameEvent = GetEventById(eventName);
+        if (gameEvent != null)
+        {
+            // 이벤트 효과를 적용하고 GameStateManager에 알림
+            GameStateManager.Instance.ApplyEventEffects(gameEvent);
         }
     }
 
     public GameEvent GetEventById(string eventId)
     {
-        // events 리스트에서 eventId와 일치하는 이벤트를 찾습니다.
         foreach (GameEvent gameEvent in events)
         {
             if (gameEvent.eventName == eventId)
             {
-                return gameEvent;  // 일치하는 이벤트를 반환
+                return gameEvent;
             }
         }
-        return null;  // 일치하는 이벤트가 없으면 null 반환
+        return null;
     }
 }
