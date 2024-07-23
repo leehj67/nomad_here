@@ -1,5 +1,6 @@
 using UnityEngine;
 using Photon.Pun;
+using Photon.Realtime;
 using UnityEngine.SceneManagement;
 
 public class PlaySceneManager : MonoBehaviourPunCallbacks
@@ -109,5 +110,21 @@ public class PlaySceneManager : MonoBehaviourPunCallbacks
 	{
 		// 원하는 스폰 위치 로직을 구현
 		return new Vector3(Random.Range(-5f, 5f), 0, Random.Range(-5f, 5f));
+	}
+
+	public override void OnPlayerLeftRoom(Player otherPlayer)
+	{
+		if (otherPlayer.IsMasterClient)
+		{
+			// 호스트가 나간 경우, 남은 플레이어들에게 알림
+			photonView.RPC("OnHostDisconnected", RpcTarget.Others);
+		}
+	}
+
+	[PunRPC]
+	private void OnHostDisconnected()
+	{
+		Debug.Log("Host has disconnected. Transitioning to EndScene.");
+		PhotonNetwork.LoadLevel("EndScene");
 	}
 }
