@@ -11,6 +11,7 @@ public class PlaySceneManager : MonoBehaviourPunCallbacks
 
 	public GameObject playerPrefab; // 플레이어 프리팹
 	public GameObject joystickCanvasPrefab; // 조이스틱 캔버스 프리팹
+	public GameObject monsterSpawnerPrefab; // 몬스터 스포너 프리팹
 
 	private void Start()
 	{
@@ -42,6 +43,12 @@ public class PlaySceneManager : MonoBehaviourPunCallbacks
 			else
 			{
 				Debug.LogError("Joystick Canvas Prefab is not assigned in the Inspector");
+			}
+
+			if (PhotonNetwork.IsMasterClient)
+			{
+				// 몬스터 스포너를 네트워크 상에 생성
+				PhotonNetwork.Instantiate(monsterSpawnerPrefab.name, Vector3.zero, Quaternion.identity);
 			}
 		}
 		else
