@@ -94,14 +94,27 @@ public class Player_Move : MonoBehaviourPun, IPunObservable
 
 	void OnTriggerEnter2D(Collider2D collision)
 	{
-		if (collision.CompareTag("Door_01") && photonView.IsMine)
+		if (photonView.IsMine)
 		{
-			GameObject door02 = GameObject.FindGameObjectWithTag("Door_02");
-			if (door02 != null)
+			if (collision.CompareTag("Door_01"))
 			{
-				Vector3 newPosition = door02.transform.position;
-				newPosition.x += 1; // X좌표를 1만큼 이동
-				transform.position = newPosition;
+				GameObject door02 = GameObject.FindGameObjectWithTag("Door_02");
+				if (door02 != null)
+				{
+					Vector3 newPosition = door02.transform.position;
+					newPosition.x += 1; // X좌표를 1만큼 이동
+					transform.position = newPosition;
+				}
+			}
+			else if (collision.CompareTag("Door_02"))
+			{
+				GameObject door01 = GameObject.FindGameObjectWithTag("Door_01");
+				if (door01 != null)
+				{
+					Vector3 newPosition = door01.transform.position;
+					newPosition.x -= 1; // X좌표를 -1만큼 이동
+					transform.position = newPosition;
+				}
 			}
 		}
 	}
