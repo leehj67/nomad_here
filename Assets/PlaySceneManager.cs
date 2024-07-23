@@ -9,6 +9,7 @@ public class PlaySceneManager : MonoBehaviourPunCallbacks
 	private bool isReturningToGameScene = false; // 게임 씬으로 돌아가는 중인지 확인
 
 	public GameObject playerPrefab; // 플레이어 프리팹
+	public GameObject joystickCanvasPrefab; // 조이스틱 캔버스 프리팹
 
 	private void Start()
 	{
@@ -17,7 +18,34 @@ public class PlaySceneManager : MonoBehaviourPunCallbacks
 		// 플레이어 오브젝트를 네트워크 상에 생성
 		if (PhotonNetwork.IsConnected)
 		{
-			PhotonNetwork.Instantiate(playerPrefab.name, GetSpawnPosition(), Quaternion.identity);
+			GameObject player = PhotonNetwork.Instantiate(playerPrefab.name, GetSpawnPosition(), Quaternion.identity);
+
+			// 조이스틱 캔버스를 인스턴스화하고 플레이어에 할당
+			if (joystickCanvasPrefab != null)
+			{
+				GameObject joystickCanvas = Instantiate(joystickCanvasPrefab);
+				VariableJoystick joystick = joystickCanvas.GetComponentInChildren<VariableJoystick>();
+				if (joystick != null && player != null)
+				{
+					Player_Move playerMove = player.GetComponent<Player_Move>();
+					if (playerMove != null)
+					{
+						playerMove.joystick = joystick;
+					}
+				}
+				else
+				{
+					Debug.LogError("Joystick or Player is null");
+				}
+			}
+			else
+			{
+				Debug.LogError("Joystick Canvas Prefab is not assigned in the Inspector");
+			}
+		}
+		else
+		{
+			Debug.LogError("PhotonNetwork is not connected");
 		}
 	}
 

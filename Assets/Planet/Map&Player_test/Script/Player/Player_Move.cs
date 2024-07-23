@@ -6,6 +6,7 @@ using Photon.Pun;
 public class Player_Move : MonoBehaviourPun, IPunObservable
 {
 	public float Speed;
+	public Joystick joystick; // 조이스틱 변수 추가
 	Rigidbody2D rigid;
 	Animator anim;
 	float h;
@@ -31,8 +32,8 @@ public class Player_Move : MonoBehaviourPun, IPunObservable
 		if (photonView.IsMine)
 		{
 			// 키보드 입력 받기
-			h = Input.GetAxisRaw("Horizontal");
-			v = Input.GetAxisRaw("Vertical");
+			h = Input.GetAxisRaw("Horizontal") + joystick.Horizontal; // 조이스틱 입력 추가
+			v = Input.GetAxisRaw("Vertical") + joystick.Vertical; // 조이스틱 입력 추가
 
 			// 이동 방향 결정
 			isHorizonMove = Mathf.Abs(h) > Mathf.Abs(v);
