@@ -19,6 +19,11 @@ public class Player_Move : MonoBehaviourPun, IPunObservable
 	private Vector2 networkVelocity;
 	private float lag;
 
+	// 애니메이션 상태 동기화 변수
+	private bool isMoving;
+	private float dirX;
+	private float dirY;
+
 	void Awake()
 	{
 		rigid = GetComponent<Rigidbody2D>();
@@ -39,9 +44,9 @@ public class Player_Move : MonoBehaviourPun, IPunObservable
 			isHorizonMove = Mathf.Abs(h) > Mathf.Abs(v);
 
 			// 이동 상태 및 방향 애니메이션 설정
-			anim.SetBool("isMoving", !Mathf.Approximately(h, 0f) || !Mathf.Approximately(v, 0f));
-			anim.SetFloat("DirX", h);
-			anim.SetFloat("DirY", v);
+			isMoving = !Mathf.Approximately(h, 0f) || !Mathf.Approximately(v, 0f);
+			dirX = h;
+			dirY = v;
 
 			UpdateAnimation();
 		}
@@ -50,6 +55,7 @@ public class Player_Move : MonoBehaviourPun, IPunObservable
 			// 네트워크에서 수신한 위치 및 회전 적용
 			transform.position = Vector3.MoveTowards(transform.position, networkPosition, Time.deltaTime * Speed);
 			rigid.velocity = networkVelocity;
+			UpdateAnimation();
 		}
 	}
 
@@ -65,8 +71,12 @@ public class Player_Move : MonoBehaviourPun, IPunObservable
 
 	void UpdateAnimation()
 	{
+		anim.SetBool("isMoving", isMoving);
+		anim.SetFloat("DirX", dirX);
+		anim.SetFloat("DirY", dirY);
+
 		// 애니메이션 상태 업데이트
-		if (Mathf.Abs(h) + Mathf.Abs(v) == 0)
+		if (Mathf.Abs(dirX) + Mathf.Abs(dirY) == 0)
 		{
 			anim.SetBool("Up", false);
 			anim.SetBool("Down", false);
@@ -75,10 +85,10 @@ public class Player_Move : MonoBehaviourPun, IPunObservable
 		}
 		else
 		{
-			anim.SetBool("Up", v > 0);
-			anim.SetBool("Down", v < 0);
-			anim.SetBool("Right", h > 0);
-			anim.SetBool("Left", h < 0);
+			anim.SetBool("Up", dirY > 0);
+			anim.SetBool("Down", dirY < 0);
+			anim.SetBool("Right", dirX > 0);
+			anim.SetBool("Left", dirX < 0);
 		}
 	}
 
@@ -104,6 +114,9 @@ public class Player_Move : MonoBehaviourPun, IPunObservable
 			stream.SendNext(transform.position);
 			stream.SendNext(transform.rotation);
 			stream.SendNext(rigid.velocity);
+			stream.SendNext(isMoving); // 애니메이션 상태 송신
+			stream.SendNext(dirX); // 애니메이션 상태 송신
+			stream.SendNext(dirY); // 애니메이션 상태 송신
 		}
 		else
 		{
@@ -111,6 +124,9 @@ public class Player_Move : MonoBehaviourPun, IPunObservable
 			networkPosition = (Vector3)stream.ReceiveNext();
 			networkRotation = (Quaternion)stream.ReceiveNext();
 			networkVelocity = (Vector2)stream.ReceiveNext();
+			isMoving = (bool)stream.ReceiveNext(); // 애니메이션 상태 수신
+			dirX = (float)stream.ReceiveNext(); // 애니메이션 상태 수신
+			dirY = (float)stream.ReceiveNext(); // 애니메이션 상태 수신
 
 			// 네트워크 지연 시간 계산
 			float lag = Mathf.Abs((float)(PhotonNetwork.Time - info.SentServerTime));
