@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &4747879488995505460
+--- !u!1 &1961760710463783797
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,14 +8,15 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 5000267996825935708}
-  - component: {fileID: 8932136423084003743}
-  - component: {fileID: 8534260487072973724}
-  - component: {fileID: 76904353336266062}
-  - component: {fileID: 2227167926431986383}
-  - component: {fileID: 6829165670133946133}
-  - component: {fileID: -5118676345174834280}
-  - component: {fileID: -5026345462820693592}
+  - component: {fileID: 2735286822757018477}
+  - component: {fileID: 5928082227394903798}
+  - component: {fileID: 3158942004962718032}
+  - component: {fileID: 3735525940013421518}
+  - component: {fileID: 7062316858110920866}
+  - component: {fileID: 5450110714864491464}
+  - component: {fileID: 5431670117919415207}
+  - component: {fileID: 8447130185751391058}
+  - component: {fileID: 8055379967716550363}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -23,28 +24,28 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &5000267996825935708
+--- !u!4 &2735286822757018477
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4747879488995505460}
+  m_GameObject: {fileID: 1961760710463783797}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 3.65, y: 0, z: 0}
+  m_LocalPosition: {x: -76.3653, y: -48.837734, z: 0}
   m_LocalScale: {x: 0.3, y: 0.3, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!212 &8932136423084003743
+--- !u!212 &5928082227394903798
 SpriteRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4747879488995505460}
+  m_GameObject: {fileID: 1961760710463783797}
   m_Enabled: 1
   m_CastShadows: 0
   m_ReceiveShadows: 0
@@ -90,13 +91,13 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!61 &8534260487072973724
+--- !u!61 &3158942004962718032
 BoxCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4747879488995505460}
+  m_GameObject: {fileID: 1961760710463783797}
   m_Enabled: 1
   m_Density: 1
   m_Material: {fileID: 0}
@@ -135,14 +136,14 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 2, y: 3}
   m_EdgeRadius: 0
---- !u!50 &76904353336266062
+--- !u!50 &3735525940013421518
 Rigidbody2D:
   serializedVersion: 4
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4747879488995505460}
+  m_GameObject: {fileID: 1961760710463783797}
   m_BodyType: 0
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
@@ -162,28 +163,27 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 4
---- !u!114 &2227167926431986383
+--- !u!114 &7062316858110920866
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4747879488995505460}
+  m_GameObject: {fileID: 1961760710463783797}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b27a225fc20ad0346bff8678b34b216c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   Speed: 4
-  joy: {fileID: 0}
---- !u!95 &6829165670133946133
+--- !u!95 &5450110714864491464
 Animator:
   serializedVersion: 5
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4747879488995505460}
+  m_GameObject: {fileID: 1961760710463783797}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
   m_Controller: {fileID: 9100000, guid: c6a6965e98f5a8145922ec21e8518869, type: 2}
@@ -197,13 +197,13 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!114 &-5118676345174834280
+--- !u!114 &5431670117919415207
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4747879488995505460}
+  m_GameObject: {fileID: 1961760710463783797}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
@@ -215,17 +215,20 @@ MonoBehaviour:
   Synchronization: 3
   OwnershipTransfer: 0
   observableSearch: 2
-  ObservedComponents: []
+  ObservedComponents:
+  - {fileID: 7062316858110920866}
+  - {fileID: 8447130185751391058}
+  - {fileID: 8055379967716550363}
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
---- !u!114 &-5026345462820693592
+--- !u!114 &8447130185751391058
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4747879488995505460}
+  m_GameObject: {fileID: 1961760710463783797}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 627855c7f81362d41938ffe0b1475957, type: 3}
@@ -235,3 +238,33 @@ MonoBehaviour:
   m_SynchronizeRotation: 1
   m_SynchronizeScale: 0
   m_UseLocal: 1
+--- !u!114 &8055379967716550363
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1961760710463783797}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b8c4a61274f60b4ea5fb4299cfdbf14, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowLayerWeightsInspector: 1
+  ShowParameterInspector: 1
+  m_SynchronizeParameters:
+  - Type: 4
+    SynchronizeType: 0
+    Name: Up
+  - Type: 4
+    SynchronizeType: 0
+    Name: Down
+  - Type: 4
+    SynchronizeType: 0
+    Name: Left
+  - Type: 4
+    SynchronizeType: 0
+    Name: Right
+  m_SynchronizeLayers:
+  - SynchronizeType: 0
+    LayerIndex: 0
