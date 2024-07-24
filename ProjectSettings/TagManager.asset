@@ -17,6 +17,7 @@ TagManager:
   - Door_07
   - Door_08
   - Wall
+  - item
   layers:
   - Default
   - TransparentFX
