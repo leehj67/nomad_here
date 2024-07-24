@@ -18,6 +18,7 @@ TagManager:
   - Door_08
   - Wall
   - item
+  - Player_itempickup
   layers:
   - Default
   - TransparentFX

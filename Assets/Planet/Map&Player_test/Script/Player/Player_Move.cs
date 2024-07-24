@@ -7,6 +7,8 @@ public class Player_Move : MonoBehaviourPun, IPunObservable
 {
 	public float Speed;
 	public Joystick joystick; // 조이스틱 변수 추가
+	public GameObject Item_pickup; // 아이템 픽업 버튼
+	public GameObject Item_putout; // 아이템 내려놓기 버튼
 	Rigidbody2D rigid;
 	Animator anim;
 	float h;
@@ -30,6 +32,24 @@ public class Player_Move : MonoBehaviourPun, IPunObservable
 		anim = GetComponent<Animator>();
 		rigid.gravityScale = 0;
 		rigid.constraints = RigidbodyConstraints2D.FreezeRotation;
+
+		// 버튼 비활성화
+		if (Item_pickup != null)
+		{
+			Item_pickup.SetActive(false);
+			Item_pickup.GetComponent<UnityEngine.UI.Button>().onClick.AddListener(OnItemPickupButtonClicked);
+		}
+
+		if (Item_putout != null)
+		{
+			Item_putout.SetActive(false);
+		}
+	}
+
+	void Start()
+	{
+		// 0.5초마다 충돌 상태 확인
+		StartCoroutine(CheckItemCollision());
 	}
 
 	void Update()
@@ -117,6 +137,53 @@ public class Player_Move : MonoBehaviourPun, IPunObservable
 				}
 			}
 		}
+	}
+
+	IEnumerator CheckItemCollision()
+	{
+		while (true)
+		{
+			yield return new WaitForSeconds(0.5f);
+
+			// 현재 오브젝트의 콜라이더와 충돌한 콜라이더들을 저장할 배열
+			Collider2D[] colliders = Physics2D.OverlapBoxAll(transform.position, GetComponent<Collider2D>().bounds.size, 0);
+
+			bool itemCollision = false;
+
+			foreach (Collider2D collider in colliders)
+			{
+				if (collider.CompareTag("item"))
+				{
+					itemCollision = true;
+					break;
+				}
+			}
+
+			// 아이템과 충돌 상태에 따라 버튼 활성화/비활성화
+			if (Item_pickup != null)
+			{
+				Item_pickup.SetActive(itemCollision);
+			}
+		}
+	}
+
+	void OnItemPickupButtonClicked()
+	{
+		if (photonView.IsMine)
+		{
+			Debug.Log("Item pickup button clicked");
+			StartCoroutine(ChangeTagTemporarily());
+		}
+	}
+
+	IEnumerator ChangeTagTemporarily()
+	{
+		Debug.Log("Changing tag to Player_itempickup");
+		string originalTag = gameObject.tag;
+		gameObject.tag = "Player_itempickup";
+		yield return new WaitForSeconds(3f);
+		gameObject.tag = originalTag;
+		Debug.Log("Tag reverted to original");
 	}
 
 	public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
