@@ -11,6 +11,7 @@ public class PlayerPlanetMove : MonoBehaviourPun
 
     private Rigidbody2D rb;
     private Vector2 moveInput;
+    private Vector2 lastMoveDirection; // 마지막 이동 방향을 저장
     public RectTransform staminaBarRectTransform;
     public float maxStamina = 100f;
     private float currentStamina;
@@ -57,6 +58,10 @@ public class PlayerPlanetMove : MonoBehaviourPun
         {
             moveInput.x = joystick.Horizontal;
             moveInput.y = joystick.Vertical;
+            if (moveInput != Vector2.zero)
+            {
+                lastMoveDirection = moveInput.normalized; // 마지막 이동 방향 갱신
+            }
 
             HandleStamina();
         }
@@ -111,7 +116,6 @@ public class PlayerPlanetMove : MonoBehaviourPun
         while (currentStamina < maxStamina)
         {
             currentStamina += 10f * Time.deltaTime;
-            currentStamina = Mathf.Clamp(currentStamina, 0, maxStamina);
             UpdateStaminaBar();
             yield return null;
         }
@@ -146,27 +150,21 @@ public class PlayerPlanetMove : MonoBehaviourPun
         if (collision.CompareTag("Door"))
         {
             Door door = collision.GetComponent<Door>();
-            if (door != null && door.targetPosition != null && door.targetSpriteRenderer != null)
+            if (door != null && door.targetPosition != null)
             {
-                StartCoroutine(TeleportToTarget(door.targetPosition, door.targetSpriteRenderer));
+                StartCoroutine(TeleportToTarget(door.targetPosition));
             }
         }
     }
 
-    private IEnumerator TeleportToTarget(Transform targetPosition, SpriteRenderer targetSpriteRenderer)
+    private IEnumerator TeleportToTarget(Transform targetPosition)
     {
         isTeleporting = true;
-        yield return new WaitForEndOfFrame();
+        yield return new WaitForEndOfFrame(); // 현재 프레임 완료 대기
 
-        Vector3 spriteCenter = targetSpriteRenderer.bounds.center;
-        Vector2 spriteSize = targetSpriteRenderer.bounds.size;
-
-        Camera.main.transform.position = new Vector3(spriteCenter.x, spriteCenter.y, Camera.main.transform.position.z);
-
-        yield return new WaitForEndOfFrame();
-
-        Vector3 offset = (targetPosition.position - transform.position).normalized * 2.0f;
-        transform.position = targetPosition.position + offset;
+        // 이동 방향을 고려한 오프셋 적용
+        Vector3 offset = lastMoveDirection * 2.0f;  // 마지막 이동 방향에 따라 오프셋 조정
+        transform.position = targetPosition.position + offset;  // 타겟 위치에 오프셋 추가
 
         isTeleporting = false;
     }
