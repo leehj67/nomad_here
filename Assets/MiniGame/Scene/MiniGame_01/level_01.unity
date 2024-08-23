@@ -1190,9 +1190,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: db299918a35e15b44919871fb1a05736, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  player: {fileID: 1574578673}
+  detectionRange: 5
   projectilePrefab: {fileID: 5497755170399382978, guid: 5c4d2a09824c8d446915a608bad88149, type: 3}
   firePoint: {fileID: 2144476146}
-  fireInterval: 1
+  projectileSpeed: 5
 --- !u!58 &713847625
 CircleCollider2D:
   m_ObjectHideFlags: 0

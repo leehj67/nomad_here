@@ -24,12 +24,4 @@ public class fireSkillAi : MonoBehaviour
 		Destroy(gameObject, lifeTime);
 	}
 
-	private void OnTriggerEnter2D(Collider2D collision)
-	{
-		// 발사체가 자신을 발사한 몬스터와 충돌하지 않도록 함
-		if (!collision.CompareTag("Monster"))
-		{
-			Destroy(gameObject);
-		}
-	}
 }
