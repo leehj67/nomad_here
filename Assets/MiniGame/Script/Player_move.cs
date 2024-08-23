@@ -13,6 +13,10 @@ public class Player_move : MonoBehaviour
 	public Button ButtonSkill; // 스킬 버튼을 참조하는 변수, 외부에서 할당
 	public GameObject projectilePrefab; // 발사체 프리팹
 	public Transform firePoint; // 발사체가 발사될 위치
+	public Slider healthBarSlider; // HP바 Slider UI
+
+	public int maxHealth = 100; // 최대 체력
+	private int currentHealth; // 현재 체력
 
 	private Rigidbody2D rigid;
 	private Animator animator;
@@ -23,12 +27,15 @@ public class Player_move : MonoBehaviour
 	private bool isOutOfView = false;
 	private bool isDashing = false;
 	private bool isSkillActive = false; // 스킬 버튼의 활성화 상태
+	private bool isTakingDamageFromTrap = false; // damage trap에 의해 피해를 받고 있는지 여부
 
 	void Awake()
 	{
 		rigid = GetComponent<Rigidbody2D>();
 		animator = GetComponent<Animator>();
 		mainCamera = Camera.main; // 메인 카메라를 참조
+		currentHealth = maxHealth; // 시작 시 최대 체력으로 초기화
+		UpdateHealthBar(); // HP바 초기 상태 업데이트
 	}
 
 	void Start()
@@ -111,6 +118,19 @@ public class Player_move : MonoBehaviour
 		{
 			isOnLeftTrap = true;
 		}
+		if (collision.CompareTag("Enemy"))
+		{
+			TakeDamage(10); // 적과 충돌 시 10의 피해를 입음
+		}
+		if (collision.CompareTag("Monster_Skill"))
+		{
+			TakeDamage(5); // Monster_Skill과 충돌 시 5의 피해를 입음
+		}
+		if (collision.CompareTag("damage trap"))
+		{
+			isTakingDamageFromTrap = true;
+			StartCoroutine(TakeDamageOverTime(10, 1f)); // 1초마다 10의 피해를 입힘
+		}
 	}
 
 	void OnTriggerExit2D(Collider2D collision)
@@ -122,6 +142,10 @@ public class Player_move : MonoBehaviour
 		if (collision.CompareTag("RunLeft"))
 		{
 			isOnLeftTrap = false;
+		}
+		if (collision.CompareTag("damage trap"))
+		{
+			isTakingDamageFromTrap = false; // damage trap에서 벗어나면 피해 중지
 		}
 	}
 
@@ -148,6 +172,7 @@ public class Player_move : MonoBehaviour
 			{
 				isOutOfView = true;
 				MovePlayerToCenter();
+				TakeDamage(20); // 시야 밖으로 나가면 HP 20 감소
 				mainCamera.GetComponent<Camera_Move>().StopCameraForSeconds(2f);
 			}
 		}
@@ -199,6 +224,38 @@ public class Player_move : MonoBehaviour
 
 			// 발사체가 왼쪽으로 이동하도록 속도 조정
 			projectile.GetComponent<Projectile>().speed *= -1;
+		}
+	}
+
+	void TakeDamage(int damage)
+	{
+		currentHealth -= damage; // 체력 감소
+		if (currentHealth <= 0)
+		{
+			currentHealth = 0;
+			Die(); // 체력이 0이 되면 사망 처리
+		}
+		UpdateHealthBar(); // 체력 바 업데이트
+	}
+
+	void Die()
+	{
+		// 사망 애니메이션이나 게임 오버 처리 등을 여기에 추가할 수 있음
+		Debug.Log("Player Died!");
+		// 추가적으로, 플레이어를 비활성화하거나 다른 처리를 할 수 있음
+	}
+
+	void UpdateHealthBar()
+	{
+		healthBarSlider.value = (float)currentHealth / maxHealth; // 현재 체력에 따라 HP바 업데이트
+	}
+
+	IEnumerator TakeDamageOverTime(int damage, float interval)
+	{
+		while (isTakingDamageFromTrap)
+		{
+			TakeDamage(damage); // 데미지 적용
+			yield return new WaitForSeconds(interval); // 지정된 시간만큼 대기
 		}
 	}
 }

@@ -23,6 +23,9 @@ TagManager:
   - Run
   - RunRight
   - RunLeft
+  - Monster_Skill
+  - Player_Skill
+  - damage trap
   layers:
   - Default
   - TransparentFX
