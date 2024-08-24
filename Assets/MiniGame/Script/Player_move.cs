@@ -29,6 +29,8 @@ public class Player_move : MonoBehaviour
 	private bool isSkillActive = false; // 스킬 버튼의 활성화 상태
 	private bool isTakingDamageFromTrap = false; // damage trap에 의해 피해를 받고 있는지 여부
 
+	private bool isInvincible = false; // 무적 상태인지 여부
+
 	void Awake()
 	{
 		rigid = GetComponent<Rigidbody2D>();
@@ -118,18 +120,21 @@ public class Player_move : MonoBehaviour
 		{
 			isOnLeftTrap = true;
 		}
-		if (collision.CompareTag("Enemy"))
+		if (collision.CompareTag("Enemy") && !isInvincible)
 		{
 			TakeDamage(10); // 적과 충돌 시 10의 피해를 입음
 		}
-		if (collision.CompareTag("Monster_Skill"))
+		if (collision.CompareTag("Monster_Skill") && !isInvincible)
 		{
 			TakeDamage(5); // Monster_Skill과 충돌 시 5의 피해를 입음
 		}
 		if (collision.CompareTag("damage trap"))
 		{
 			isTakingDamageFromTrap = true;
-			StartCoroutine(TakeDamageOverTime(10, 1f)); // 1초마다 10의 피해를 입힘
+			if (!isInvincible)
+			{
+				StartCoroutine(TakeDamageOverTime(10, 1f)); // 1초마다 10의 피해를 입힘
+			}
 		}
 	}
 
@@ -199,9 +204,11 @@ public class Player_move : MonoBehaviour
 	IEnumerator Dash()
 	{
 		isDashing = true; // 대쉬 시작
+		isInvincible = true; // 대쉬 중 무적 상태로 전환
 		float dashDirection = facingRight ? 1 : -1; // 현재 방향에 따른 대쉬 방향 설정
 		rigid.velocity = new Vector2(dashDirection * Dashspeed, rigid.velocity.y); // 대쉬 속도 설정
 		yield return new WaitForSeconds(0.25f); // 0.25초 동안 대쉬 유지
+		isInvincible = false; // 대쉬 종료 후 무적 상태 해제
 		isDashing = false; // 대쉬 종료
 	}
 
