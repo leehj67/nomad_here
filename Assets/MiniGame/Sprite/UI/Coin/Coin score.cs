@@ -6,6 +6,21 @@ public class Coinscore : MonoBehaviour
 	public int score = 0;
 	public Text scoreText;
 
+	private static Coinscore instance;
+
+	void Awake()
+	{
+		if (instance == null)
+		{
+			instance = this;
+			DontDestroyOnLoad(gameObject);
+		}
+		else
+		{
+			Destroy(gameObject);
+		}
+	}
+
 	void Start()
 	{
 		UpdateScoreUI();
