@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement; // 씬 전환을 위해 추가
+using UnityEditor; // 씬 드롭다운을 위해 추가
 
 public class Player_move : MonoBehaviour
 {
@@ -14,6 +16,10 @@ public class Player_move : MonoBehaviour
 	public GameObject projectilePrefab; // 발사체 프리팹
 	public Transform firePoint; // 발사체가 발사될 위치
 	public Slider healthBarSlider; // HP바 Slider UI
+	public SceneAsset gameOverScene; // 게임 오버 씬, 드롭다운으로 설정
+	public Text gameOverText; // 게임 오버 메시지를 출력하는 UI 텍스트
+
+	private string gameOverSceneName; // 게임 오버 씬 이름
 
 	public int maxHealth = 100; // 최대 체력
 	private int currentHealth; // 현재 체력
@@ -38,6 +44,18 @@ public class Player_move : MonoBehaviour
 		mainCamera = Camera.main; // 메인 카메라를 참조
 		currentHealth = maxHealth; // 시작 시 최대 체력으로 초기화
 		UpdateHealthBar(); // HP바 초기 상태 업데이트
+
+		// 씬 이름을 저장
+		if (gameOverScene != null)
+		{
+			gameOverSceneName = gameOverScene.name;
+		}
+
+		// 게임 오버 텍스트 초기 상태 설정
+		if (gameOverText != null)
+		{
+			gameOverText.enabled = false; // 초기에는 비활성화
+		}
 	}
 
 	void Start()
@@ -240,19 +258,31 @@ public class Player_move : MonoBehaviour
 	void TakeDamage(int damage)
 	{
 		currentHealth -= damage; // 체력 감소
-		if (currentHealth <= 0)
+		if (currentHealth <= 1) // 체력이 1 이하가 되면
 		{
-			currentHealth = 0;
-			Die(); // 체력이 0이 되면 사망 처리
+			currentHealth = 0; // 체력을 0으로 설정
+			Die(); // 게임 오버 처리
 		}
 		UpdateHealthBar(); // 체력 바 업데이트
 	}
 
 	void Die()
 	{
-		// 사망 애니메이션이나 게임 오버 처리 등을 여기에 추가할 수 있음
-		Debug.Log("Player Died!");
-		// 추가적으로, 플레이어를 비활성화하거나 다른 처리를 할 수 있음
+		// 게임 오버 메시지 출력
+		if (gameOverText != null)
+		{
+			gameOverText.enabled = true;
+			gameOverText.text = "게임 오버";
+		}
+
+		// 일정 시간 후 씬 전환 (게임 오버 씬으로)
+		StartCoroutine(GameOverSceneTransition());
+	}
+
+	IEnumerator GameOverSceneTransition()
+	{
+		yield return new WaitForSeconds(2f); // 2초 대기
+		SceneManager.LoadScene(gameOverSceneName);
 	}
 
 	void UpdateHealthBar()

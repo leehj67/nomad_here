@@ -2887,6 +2887,8 @@ MonoBehaviour:
   projectilePrefab: {fileID: 1202598394491037302, guid: 8435e62d550ddbb46b61380864657873, type: 3}
   firePoint: {fileID: 2022312632}
   healthBarSlider: {fileID: 820571509}
+  gameOverScene: {fileID: 102900000, guid: b99cdb817625f2944accc5882c627497, type: 3}
+  gameOverText: {fileID: 0}
   maxHealth: 100
 --- !u!1001 &1616007941
 PrefabInstance:
