@@ -201,13 +201,16 @@ public class Player_move : MonoBehaviour
 		isDashing = true; // 대쉬 시작
 		float dashDirection = facingRight ? 1 : -1; // 현재 방향에 따른 대쉬 방향 설정
 		rigid.velocity = new Vector2(dashDirection * Dashspeed, rigid.velocity.y); // 대쉬 속도 설정
-		yield return new WaitForSeconds(1f); // 1초 동안 대쉬 유지
+		yield return new WaitForSeconds(0.25f); // 0.25초 동안 대쉬 유지
 		isDashing = false; // 대쉬 종료
 	}
 
 	void OnSkillButtonClicked()
 	{
-		isSkillActive = true; // 스킬 버튼 클릭 시 스킬 활성화
+		if (!isSkillActive) // 스킬이 활성화되지 않았을 때만 실행
+		{
+			isSkillActive = true; // 스킬 버튼 클릭 시 스킬 활성화
+		}
 	}
 
 	void FireProjectile()

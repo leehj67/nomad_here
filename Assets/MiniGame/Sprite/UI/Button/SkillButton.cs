@@ -5,46 +5,45 @@ using UnityEngine.UI;
 
 public class SkillButton : MonoBehaviour
 {
-	public bool isSkillActive = false;
-
 	private Button skillButton;
 
 	void Start()
 	{
-		// Button 컴포넌트를 가져와서 클릭 이벤트에 메서드를 연결
+		// Button 컴포넌트를 가져옵니다.
 		skillButton = GetComponent<Button>();
-		skillButton.onClick.AddListener(OnSkillButtonClicked);
+
+		// 만약 Button 컴포넌트를 찾지 못했다면 오류 메시지를 출력합니다.
+		if (skillButton == null)
+		{
+			Debug.LogError("Button component not found on this GameObject.");
+		}
+
+		// 버튼 클릭 시 DisableButtonForAWhile 메서드를 실행하도록 설정합니다.
+		skillButton.onClick.AddListener(() => StartCoroutine(DisableButtonForAWhile()));
 	}
 
 	void Update()
 	{
-		// 키보드 입력을 감지하여 'I' 키가 눌렸을 때 스킬 버튼 클릭 효과를 실행
-		if (Input.GetKeyDown(KeyCode.I))
+		// 스킬 버튼이 활성화된 상태에서만 I키 입력을 처리합니다.
+		if (skillButton != null && skillButton.interactable)
 		{
-			OnSkillButtonClicked();
+			if (Input.GetKeyDown(KeyCode.I))
+			{
+				skillButton.onClick.Invoke();
+			}
 		}
 	}
 
-	void OnSkillButtonClicked()
+	// 버튼을 2초 동안 비활성화하는 Coroutine
+	private IEnumerator DisableButtonForAWhile()
 	{
-		if (!skillButton.interactable)
-			return; // 버튼이 비활성화된 경우 동작하지 않도록 설정
-
-		isSkillActive = true; // 클릭 시 isSkillActive 변수를 true로 변경
-		Debug.Log("Skill button clicked or I key pressed! isSkillActive set to true.");
-
-		// 버튼을 비활성화하고 0.5초 후 다시 활성화
+		// 버튼을 비활성화합니다.
 		skillButton.interactable = false;
-		StartCoroutine(ResetSkill());
-	}
 
-	IEnumerator ResetSkill()
-	{
-		yield return new WaitForSeconds(0.5f); // 0.5초 대기
-		isSkillActive = false; // isSkillActive 변수를 false로 변경
-		Debug.Log("isSkillActive set to false.");
+		// 2초 동안 대기합니다.
+		yield return new WaitForSeconds(2f);
 
-		// 버튼을 다시 활성화
+		// 버튼을 다시 활성화합니다.
 		skillButton.interactable = true;
 	}
 }

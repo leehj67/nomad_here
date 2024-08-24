@@ -5,42 +5,45 @@ using UnityEngine.UI;
 
 public class DashButton : MonoBehaviour
 {
-	public bool isDashing = false;
-
 	private Button dashButton;
 
 	void Start()
 	{
+		// Button 컴포넌트를 가져옵니다.
 		dashButton = GetComponent<Button>();
-		dashButton.onClick.AddListener(OnDashButtonClicked);
+
+		// 만약 Button 컴포넌트를 찾지 못했다면 오류 메시지를 출력합니다.
+		if (dashButton == null)
+		{
+			Debug.LogError("Button component not found on this GameObject.");
+		}
+
+		// 버튼 클릭 시 DisableButtonForASecond 메서드를 실행하도록 설정합니다.
+		dashButton.onClick.AddListener(() => StartCoroutine(DisableButtonForASecond()));
 	}
 
 	void Update()
 	{
-		// J 키를 눌렀을 때도 버튼이 클릭된 것과 동일한 동작을 실행
-		if (Input.GetKeyDown(KeyCode.J))
+		// dashButton이 활성화된 상태에서만 K키 입력을 처리합니다.
+		if (dashButton != null && dashButton.interactable)
 		{
-			OnDashButtonClicked();
+			if (Input.GetKeyDown(KeyCode.K))
+			{
+				dashButton.onClick.Invoke();
+			}
 		}
 	}
 
-	void OnDashButtonClicked()
+	// 버튼을 1초 동안 비활성화하는 Coroutine
+	private IEnumerator DisableButtonForASecond()
 	{
-		if (!dashButton.interactable)
-			return; // 버튼이 비활성화된 경우 동작하지 않도록 설정
-
-		isDashing = true;
-		Debug.Log("Dash button clicked or J key pressed! isDashing set to true.");
-
+		// 버튼을 비활성화합니다.
 		dashButton.interactable = false;
-		StartCoroutine(ResetDash());
-	}
 
-	IEnumerator ResetDash()
-	{
+		// 1초 동안 대기합니다.
 		yield return new WaitForSeconds(1f);
-		isDashing = false;
-		Debug.Log("isDashing set to false.");
+
+		// 버튼을 다시 활성화합니다.
 		dashButton.interactable = true;
 	}
 }
