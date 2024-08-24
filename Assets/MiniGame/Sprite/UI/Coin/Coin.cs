@@ -1,7 +1,6 @@
 using UnityEngine;
-using UnityEngine.UI;
 
-public class ScoreManager : MonoBehaviour
+public class Coin : MonoBehaviour
 {
 	public int coinValue = 10;  // 코인 획득 시 추가할 점수
 	public Coinscore scoreManager;  // Coinscore 스크립트 참조

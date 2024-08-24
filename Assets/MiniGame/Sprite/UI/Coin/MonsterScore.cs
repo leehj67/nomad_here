@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class Coinscore : MonoBehaviour
+public class MonsterScore : MonoBehaviour
 {
 	public int score = 0;
 	public Text scoreText;
@@ -19,6 +19,6 @@ public class Coinscore : MonoBehaviour
 
 	void UpdateScoreUI()
 	{
-		scoreText.text = "CoinScore: " + score.ToString();
+		scoreText.text = "Monster Score: " + score.ToString();
 	}
 }

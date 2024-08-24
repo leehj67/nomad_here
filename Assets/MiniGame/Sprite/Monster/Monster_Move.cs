@@ -9,6 +9,7 @@ public class Monster_Move : MonoBehaviour
 	public Transform firePoint; // 발사체가 발사될 위치
 	public float attackRange = 10f; // 원거리 공격 범위, 유니티에서 조절 가능
 	public float fireRate = 1f; // 발사 간격 (초), 유니티에서 조절 가능
+	public MonsterScore monsterScoreManager; // MonsterScore 스크립트를 참조 (드래그 앤 드롭)
 
 	private float nextFireTime = 0f; // 다음 발사 시간
 
@@ -48,6 +49,10 @@ public class Monster_Move : MonoBehaviour
 		// "Player_Skill" 태그를 가진 오브젝트와 충돌하면 몬스터 오브젝트 삭제
 		if (collision.CompareTag("Player_Skill"))
 		{
+			if (monsterScoreManager != null)
+			{
+				monsterScoreManager.AddScore(20); // 몬스터 점수 20점 추가
+			}
 			Destroy(gameObject); // 몬스터 오브젝트 삭제
 		}
 	}
