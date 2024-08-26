@@ -4,7 +4,7 @@ using UnityEngine.UI;
 public class Coinscore : MonoBehaviour
 {
 	public int score = 0;
-	public Text scoreText;
+	public Text[] scoreTexts; // 3개의 텍스트 오브젝트를 관리하기 위한 배열
 
 	private static Coinscore instance;
 
@@ -34,6 +34,12 @@ public class Coinscore : MonoBehaviour
 
 	void UpdateScoreUI()
 	{
-		scoreText.text = "CoinScore: " + score.ToString();
+		foreach (Text scoreText in scoreTexts)
+		{
+			if (scoreText != null)
+			{
+				scoreText.text = "CoinScore: " + score.ToString();
+			}
+		}
 	}
 }

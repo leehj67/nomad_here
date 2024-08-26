@@ -4,7 +4,7 @@ using UnityEngine.UI;
 public class MonsterScore : MonoBehaviour
 {
 	public int score = 0;
-	public Text scoreText;
+	public Text[] scoreTexts; // 3개의 텍스트 오브젝트를 관리하기 위한 배열
 
 	void Start()
 	{
@@ -19,6 +19,12 @@ public class MonsterScore : MonoBehaviour
 
 	void UpdateScoreUI()
 	{
-		scoreText.text = "Monster Score: " + score.ToString();
+		foreach (Text scoreText in scoreTexts)
+		{
+			if (scoreText != null)
+			{
+				scoreText.text = "Monster Score: " + score.ToString();
+			}
+		}
 	}
 }

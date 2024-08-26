@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
@@ -18,6 +17,8 @@ public class Player_move : MonoBehaviour
 	public Slider healthBarSlider;
 	public SceneAsset gameOverScene;
 	public SceneAsset gameClearScene; // 게임 클리어 씬, 드롭다운으로 설정
+	public GameObject gameOverUI; // 게임 오버 시 나타날 UI 오브젝트
+	public GameObject gameClearUI; // 게임 클리어 시 나타날 UI 오브젝트
 
 	private string gameOverSceneName;
 	private string gameClearSceneName; // 게임 클리어 씬 이름
@@ -36,6 +37,7 @@ public class Player_move : MonoBehaviour
 	private bool isSkillActive = false;
 	private bool isTakingDamageFromTrap = false;
 	private bool isInvincible = false;
+	private bool isGameOver = false; // 게임 오버 여부 확인
 
 	void Awake()
 	{
@@ -54,6 +56,17 @@ public class Player_move : MonoBehaviour
 		{
 			gameClearSceneName = gameClearScene.name;
 		}
+
+		// 게임 오버 및 클리어 UI 초기화
+		if (gameOverUI != null)
+		{
+			gameOverUI.SetActive(false);
+		}
+
+		if (gameClearUI != null)
+		{
+			gameClearUI.SetActive(false);
+		}
 	}
 
 	void Start()
@@ -64,6 +77,8 @@ public class Player_move : MonoBehaviour
 
 	void FixedUpdate()
 	{
+		if (isGameOver) return; // 게임 오버 시 입력 무시
+
 		float h = Input.GetAxisRaw("Horizontal");
 
 		if (!isOnRightTrap && !isOnLeftTrap && !isDashing)
@@ -146,11 +161,8 @@ public class Player_move : MonoBehaviour
 		}
 		if (collision.CompareTag("End"))
 		{
-			// "End" 태그를 가진 오브젝트와 충돌 시 게임 클리어 씬으로 전환
-			if (!string.IsNullOrEmpty(gameClearSceneName))
-			{
-				SceneManager.LoadScene(gameClearSceneName);
-			}
+			// "End" 태그를 가진 오브젝트와 충돌 시 게임 클리어 처리
+			StartCoroutine(HandleGameClear());
 		}
 	}
 
@@ -256,15 +268,31 @@ public class Player_move : MonoBehaviour
 		if (currentHealth <= 1)
 		{
 			currentHealth = 0;
-			Die(); // 체력이 0 이하가 되면 즉시 게임 오버
+			StartCoroutine(HandleGameOver()); // 게임 오버 처리
 		}
 		UpdateHealthBar();
 	}
 
-	void Die()
+	IEnumerator HandleGameOver()
 	{
-		// 즉시 게임 오버 씬으로 전환
-		SceneManager.LoadScene(gameOverSceneName);
+		isGameOver = true;
+		if (gameOverUI != null)
+		{
+			gameOverUI.SetActive(true); // 게임 오버 UI 표시
+		}
+		yield return new WaitForSeconds(5f); // 5초 대기
+		SceneManager.LoadScene(gameOverSceneName); // 게임 오버 씬으로 전환
+	}
+
+	IEnumerator HandleGameClear()
+	{
+		isGameOver = true;
+		if (gameClearUI != null)
+		{
+			gameClearUI.SetActive(true); // 게임 클리어 UI 표시
+		}
+		yield return new WaitForSeconds(5f); // 5초 대기
+		SceneManager.LoadScene(gameClearSceneName); // 게임 클리어 씬으로 전환
 	}
 
 	void UpdateHealthBar()

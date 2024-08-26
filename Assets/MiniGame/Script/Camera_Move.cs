@@ -7,6 +7,7 @@ public class Camera_Move : MonoBehaviour
 	public float moveSpeed = 5f; // 카메라 이동 속도, 유니티 에디터에서 설정 가능
 	private bool isMoving = true; // 카메라가 이동 중인지 확인하는 변수
 	private Camera mainCamera;
+	public float minYPosition = -46f; // 카메라가 멈출 Y값, 유니티 에디터에서 설정 가능
 
 	void Start()
 	{
@@ -20,6 +21,12 @@ public class Camera_Move : MonoBehaviour
 		{
 			// 카메라를 Y축 방향으로 하강
 			transform.Translate(Vector3.down * moveSpeed * Time.deltaTime);
+
+			// Y값이 minYPosition보다 작아지면 이동을 멈춤
+			if (transform.position.y <= minYPosition)
+			{
+				isMoving = false;
+			}
 		}
 	}
 
@@ -33,6 +40,10 @@ public class Camera_Move : MonoBehaviour
 	{
 		isMoving = false; // 카메라 이동 멈춤
 		yield return new WaitForSeconds(seconds); // 지정된 시간 동안 대기
-		isMoving = true; // 카메라 이동 재개
+												  // 카메라가 minYPosition보다 위에 있을 때만 이동 재개
+		if (transform.position.y > minYPosition)
+		{
+			isMoving = true;
+		}
 	}
 }
