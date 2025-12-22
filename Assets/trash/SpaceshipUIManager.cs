@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.UI;
 using TMPro;
 
 public class SpaceshipUIManager : MonoBehaviour
@@ -12,69 +11,68 @@ public class SpaceshipUIManager : MonoBehaviour
     public TMP_Text partsStatusText;
     public TMP_Text energyStatusText;
 
-    public TMP_Text foodValueText; // Food value 텍스트 추가
-    public TMP_Text partsValueText; // Parts value 텍스트 추가
-    public TMP_Text energyValueText; // Energy value 텍스트 추가
+    public TMP_Text foodValueText;
+    public TMP_Text partsValueText;
+    public TMP_Text energyValueText;
 
-    private float maxBarWidth;
+    private float foodMaxWidth;
+    private float partsMaxWidth;
+    private float energyMaxWidth;
+
+    private void Awake()
+    {
+        // max 폭을 각자 저장(프리팹/레이아웃이 달라도 안전)
+        if (foodBar)   foodMaxWidth = foodBar.sizeDelta.x;
+        if (partsBar)  partsMaxWidth = partsBar.sizeDelta.x;
+        if (energyBar) energyMaxWidth = energyBar.sizeDelta.x;
+    }
 
     private void Start()
     {
-        // GameStateManager의 인스턴스를 설정
         GameStateManager.Instance.SetSpaceshipUIManager(this);
-
-        // 바의 최대 길이를 초기화
-        maxBarWidth = foodBar.sizeDelta.x;
         UpdateUI();
+    }
+
+    private void OnEnable()
+    {
+        // InGameScene으로 “돌아왔을 때”도 갱신되게
+        if (GameStateManager.Instance != null)
+            UpdateUI();
     }
 
     public void UpdateUI()
     {
-        // 우주선 상태 업데이트
-        UpdateBar(foodBar, GameStateManager.Instance.ShipFood, foodValueText);
-        UpdateBar(partsBar, GameStateManager.Instance.ShipParts, partsValueText);
-        UpdateBar(energyBar, GameStateManager.Instance.ShipEnergy, energyValueText);
+        var gsm = GameStateManager.Instance;
+        if (gsm == null) return;
 
-        // 상태 텍스트 업데이트
-        UpdateStatusText(foodStatusText, GameStateManager.Instance.ShipFood);
-        UpdateStatusText(partsStatusText, GameStateManager.Instance.ShipParts);
-        UpdateStatusText(energyStatusText, GameStateManager.Instance.ShipEnergy);
+        UpdateBar(foodBar,   gsm.ShipFood,   foodValueText,   foodMaxWidth);
+        UpdateBar(partsBar,  gsm.ShipParts,  partsValueText,  partsMaxWidth);
+        UpdateBar(energyBar, gsm.ShipEnergy, energyValueText, energyMaxWidth);
+
+        UpdateStatusText(foodStatusText,   gsm.ShipFood);
+        UpdateStatusText(partsStatusText,  gsm.ShipParts);
+        UpdateStatusText(energyStatusText, gsm.ShipEnergy);
     }
 
-    private void UpdateBar(RectTransform bar, int value, TMP_Text valueText)
+    private void UpdateBar(RectTransform bar, int value, TMP_Text valueText, float maxWidth)
     {
-        float newWidth;
-        if (value > 100)
-        {
-            newWidth = maxBarWidth; // 100 이상일 경우 최대 길이를 유지
-        }
-        else
-        {
-            newWidth = maxBarWidth * (value / 100f); // 100 이하일 경우 길이를 조정
-        }
+        if (bar == null) return;
+
+        float clamped = Mathf.Clamp(value, 0, 100);
+        float newWidth = maxWidth * (clamped / 100f);
         bar.sizeDelta = new Vector2(newWidth, bar.sizeDelta.y);
-        
-        // 현재 값 텍스트 업데이트
-        valueText.text = value.ToString();
+
+        if (valueText != null)
+            valueText.text = value.ToString();
     }
 
     private void UpdateStatusText(TMP_Text statusText, int value)
     {
-        if (value >= 75)
-        {
-            statusText.text = "Good";
-        }
-        else if (value >= 50)
-        {
-            statusText.text = "Normal";
-        }
-        else if (value >= 25)
-        {
-            statusText.text = "Danger";
-        }
-        else
-        {
-            statusText.text = "Critical";
-        }
+        if (statusText == null) return;
+
+        if (value >= 75) statusText.text = "Good";
+        else if (value >= 50) statusText.text = "Normal";
+        else if (value >= 25) statusText.text = "Danger";
+        else statusText.text = "Critical";
     }
 }

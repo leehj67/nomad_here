@@ -5,137 +5,184 @@ using UnityEngine.SceneManagement;
 
 public class PlaySceneManager : MonoBehaviourPunCallbacks
 {
-	public float playDuration = 60f; // 게임 플레이 시간
-	private float timer; // 타이머
-	private bool isReturningToGameScene = false; // 게임 씬으로 돌아가는 중인지 확인
+    [Header("플레이 시간")]
+    public float playDuration = 60f;
+    private float timer;
+    private bool isReturningToGameScene = false;
 
-	public GameObject playerPrefab; // 플레이어 프리팹
-	public GameObject joystickCanvasPrefab; // 조이스틱 캔버스 프리팹
-	public GameObject monsterSpawnerPrefab; // 몬스터 스포너 프리팹
-	public GameObject itemControllerPrefab; // 아이템 컨트롤러 프리팹
+    [Header("프리팹")]
+    public GameObject playerPrefab;
+    public GameObject uiPrefab;
+    public GameObject monsterSpawnerPrefab; // 몬스터는 Photon으로 (필요 시)
 
-	private void Start()
-	{
-		timer = playDuration; // 타이머 초기화
+    void Start()
+    {
+        timer = playDuration;
 
-		// 플레이어 오브젝트를 네트워크 상에 생성
-		if (PhotonNetwork.IsConnected)
-		{
-			GameObject player = PhotonNetwork.Instantiate(playerPrefab.name, GetSpawnPosition(), Quaternion.identity);
+        // (안전) ItemDatabase 존재 체크 - 없으면 인벤 복원이 실패함
+        if (ItemDatabase.Instance == null)
+        {
+            Debug.LogWarning("[PlaySceneManager] ItemDatabase.Instance가 null입니다. " +
+                             "PlayScene에 ItemDatabase 오브젝트가 있는지, allItems에 ItemData가 등록됐는지 확인하세요.");
+        }
 
-			// 조이스틱 캔버스를 인스턴스화하고 플레이어에 할당
-			if (joystickCanvasPrefab != null)
-			{
-				GameObject joystickCanvas = Instantiate(joystickCanvasPrefab);
-				VariableJoystick joystick = joystickCanvas.GetComponentInChildren<VariableJoystick>();
-				if (joystick != null && player != null)
-				{
-					Player_Move playerMove = player.GetComponent<Player_Move>();
-					if (playerMove != null)
-					{
-						playerMove.joystick = joystick;
-					}
-				}
-				else
-				{
-					Debug.LogError("Joystick or Player is null");
-				}
-			}
-			else
-			{
-				Debug.LogError("Joystick Canvas Prefab is not assigned in the Inspector");
-			}
+        // 1) Player 생성 (Photon)
+        GameObject player = PhotonNetwork.Instantiate(playerPrefab.name, GetSpawnPosition(), Quaternion.identity);
+        Player_Move pm = player.GetComponent<Player_Move>();
 
-			if (PhotonNetwork.IsMasterClient)
-			{
-				// 몬스터 스포너를 네트워크 상에 생성
-				PhotonNetwork.Instantiate(monsterSpawnerPrefab.name, Vector3.zero, Quaternion.identity);
+        // 2) UI 생성 (로컬)
+        GameObject uiObject = Instantiate(uiPrefab);
+        GameUIRoot uiRoot = uiObject.GetComponent<GameUIRoot>();
 
-				// 아이템 컨트롤러를 네트워크 상에 생성
-				PhotonNetwork.Instantiate(itemControllerPrefab.name, Vector3.zero, Quaternion.identity);
-			}
-		}
-		else
-		{
-			Debug.LogError("PhotonNetwork is not connected");
-		}
-	}
+        pm.joystick          = uiRoot.joystick;
+        pm.inventoryUI       = uiRoot.inventoryManager;
+        pm.staminaImage      = uiRoot.staminaImage;
+        pm.lowStaminaOverlay = uiRoot.lowStaminaOverlay;
+        pm.flashlightIcon    = uiRoot.flashlightIcon;
 
-	private void Update()
-	{
-		timer -= Time.deltaTime; // 시간 감소
-		if (timer <= 0 && !isReturningToGameScene)
-		{
-			isReturningToGameScene = true;
-			CheckResourcesAndReturn(); // 자원 체크 후 적절한 조치
-		}
-	}
+        uiRoot.inventoryManager.dropPoint = player.transform;
 
-	// 자원 상태를 확인하고 적절한 씬으로 이동
-	private void CheckResourcesAndReturn()
-	{
-		GameStateManager gameStateManager = GameStateManager.Instance;
-		if (gameStateManager != null)
-		{
-			if (gameStateManager.ShipFood <= 0 || gameStateManager.ShipParts <= 0 || gameStateManager.ShipEnergy <= 0)
-			{
-				Debug.Log("Game Over: One or more resources depleted. Transitioning to EndScene.");
-				PhotonNetwork.LoadLevel("EndScene"); // 자원이 하나라도 0 이하이면 EndScene 로드
-			}
-			else
-			{
-				ReturnToGameScene(); // 자원이 충분하면 GameScene 로드
-			}
-		}
-		else
-		{
-			Debug.LogError("GameStateManager instance not found. Cannot check resources.");
-			ReturnToGameScene(); // GameStateManager 인스턴스를 찾을 수 없으면 GameScene 로드
-		}
-	}
+        // ✅ 3) (핵심) Photon CustomProperties에서 "개인 인벤" 복원
+        RestoreInventoryFromPhoton(player, uiRoot);
 
-	private void ReturnToGameScene()
-	{
-		Debug.Log("Returning to GameScene...");
-		SceneManager.sceneLoaded += OnGameSceneLoaded; // 씬 로드 이벤트에 메서드 등록
-		PhotonNetwork.LoadLevel("GameScene");
-	}
+        // 4) 스포너들 (마스터만)
+        if (PhotonNetwork.IsMasterClient)
+        {
+            // ✅ (추가) PlayScene 진입 시 기믹은 항상 초기화 (다인 동기화)
+            TryResetGimmicks_MasterOnce();
 
-	private void OnGameSceneLoaded(Scene scene, LoadSceneMode mode)
-	{
-		if (scene.name == "GameScene")
-		{
-			Debug.Log("GameScene loaded, advancing day...");
-			if (GameStateManager.Instance != null)
-			{
-				GameStateManager.Instance.AdvanceDay();
-				GameStateManager.Instance.ShowDayPanel();
-				GameStateManager.Instance.ShowTimerPanel();
-			}
-			SceneManager.sceneLoaded -= OnGameSceneLoaded; // 이벤트 리스너 해제
-		}
-	}
+            if (monsterSpawnerPrefab != null)
+            {
+                PhotonNetwork.Instantiate(monsterSpawnerPrefab.name, Vector3.zero, Quaternion.identity);
+            }
+            // ✅ 아이템 스포너는 씬 고정 존재(ItemSpawnManager)라 여기서 생성하지 않음
+        }
+    }
 
-	// 플레이어 스폰 위치를 결정하는 메소드 (예: 랜덤 위치)
-	Vector3 GetSpawnPosition()
-	{
-		// 원하는 스폰 위치 로직을 구현
-		return new Vector3(Random.Range(-5f, 5f), 0, Random.Range(-5f, 5f));
-	}
+    /// <summary>
+    /// 마스터가 PlayScene 시작 시 기믹을 1회 초기화한다.
+    /// (GimmickManager.ResetAll()은 내부에서 RPC로 전원 동기화됨)
+    /// </summary>
+    private void TryResetGimmicks_MasterOnce()
+    {
+        // 씬에 GimmickManager가 없을 수도 있으니 안전 처리
+        var gimmick = FindObjectOfType<GimmickManager>();
+        if (gimmick == null)
+        {
+            Debug.LogWarning("[PlaySceneManager] GimmickManager를 찾지 못했습니다. (씬에 오브젝트가 있는지 확인)");
+            return;
+        }
 
-	public override void OnPlayerLeftRoom(Player otherPlayer)
-	{
-		if (otherPlayer.IsMasterClient)
-		{
-			// 호스트가 나간 경우, 남은 플레이어들에게 알림
-			photonView.RPC("OnHostDisconnected", RpcTarget.Others);
-		}
-	}
+        gimmick.ResetAll();
+        Debug.Log("[PlaySceneManager] Master triggered gimmick ResetAll()");
+    }
 
-	[PunRPC]
-	private void OnHostDisconnected()
-	{
-		Debug.Log("Host has disconnected. Transitioning to EndScene.");
-		PhotonNetwork.LoadLevel("EndScene");
-	}
+    /// <summary>
+    /// Photon Player CustomProperties("INV")에 저장된 itemId들을 읽어 PlayerInventory에 복원하고,
+    /// 필요 시 인벤 UI 갱신 트리거까지 호출할 수 있게 연결해둔다.
+    /// </summary>
+    void RestoreInventoryFromPhoton(GameObject player, GameUIRoot uiRoot)
+    {
+        var inv = player.GetComponent<PlayerInventory>();
+        if (inv == null)
+        {
+            Debug.LogWarning("[PlaySceneManager] PlayerInventory 컴포넌트가 플레이어 프리팹에 없습니다. " +
+                             "playerPrefab에 PlayerInventory를 추가하세요.");
+            return;
+        }
+
+        inv.Clear();
+
+        var ids = PlayerInventorySync.LoadLocalIds();
+        foreach (var id in ids)
+        {
+            var data = ItemDatabase.Get(id);
+            if (data != null)
+                inv.Add(data);
+            else
+                Debug.LogWarning($"[PlaySceneManager] ItemDatabase에서 itemId='{id}'를 찾지 못했습니다. ItemData 등록을 확인하세요.");
+        }
+
+        Debug.Log($"[PlaySceneManager] 인벤 복원 완료: {inv.items.Count}개");
+
+        // ✅ (선택) 네 인벤 UI가 "리스트로 갱신"을 지원하면 여기서 호출
+        // uiRoot.inventoryManager.RefreshFromInventory(inv.items);
+    }
+
+    private void Update()
+    {
+        timer -= Time.deltaTime;
+        if (timer <= 0 && !isReturningToGameScene)
+        {
+            isReturningToGameScene = true;
+            CheckResourcesAndReturn();
+        }
+    }
+
+    private void CheckResourcesAndReturn()
+    {
+        GameStateManager gameStateManager = GameStateManager.Instance;
+        if (gameStateManager != null)
+        {
+            if (gameStateManager.ShipFood <= 0 ||
+                gameStateManager.ShipParts <= 0 ||
+                gameStateManager.ShipEnergy <= 0)
+            {
+                Debug.Log("Game Over: One or more resources depleted. Transitioning to EndScene.");
+                PhotonNetwork.LoadLevel("EndScene");
+            }
+            else
+            {
+                ReturnToGameScene();
+            }
+        }
+        else
+        {
+            Debug.LogError("GameStateManager instance not found. Cannot check resources.");
+            ReturnToGameScene();
+        }
+    }
+
+    private void ReturnToGameScene()
+    {
+        Debug.Log("Returning to GameScene...");
+        SceneManager.sceneLoaded += OnGameSceneLoaded;
+        PhotonNetwork.LoadLevel("GameScene");
+    }
+
+    private void OnGameSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        if (scene.name == "GameScene")
+        {
+            Debug.Log("GameScene loaded, advancing day...");
+            if (GameStateManager.Instance != null)
+            {
+                GameStateManager.Instance.AdvanceDay();
+                GameStateManager.Instance.ShowDayPanel();
+                GameStateManager.Instance.ShowTimerPanel();
+            }
+            SceneManager.sceneLoaded -= OnGameSceneLoaded;
+        }
+    }
+
+    Vector3 GetSpawnPosition()
+    {
+        // 원본 유지
+        return new Vector3(Random.Range(-5f, 5f), 0, Random.Range(-5f, 5f));
+    }
+
+    public override void OnPlayerLeftRoom(Player otherPlayer)
+    {
+        if (otherPlayer.IsMasterClient)
+        {
+            photonView.RPC("OnHostDisconnected", RpcTarget.Others);
+        }
+    }
+
+    [PunRPC]
+    private void OnHostDisconnected()
+    {
+        Debug.Log("Host has disconnected. Transitioning to EndScene.");
+        PhotonNetwork.LoadLevel("EndScene");
+    }
 }

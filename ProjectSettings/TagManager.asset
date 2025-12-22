@@ -26,6 +26,7 @@ TagManager:
   - Monster_Skill
   - Player_Skill
   - damage trap
+  - fuse
   layers:
   - Default
   - TransparentFX

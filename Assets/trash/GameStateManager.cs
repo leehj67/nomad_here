@@ -7,15 +7,20 @@ public class GameStateManager : MonoBehaviourPunCallbacks
 {
     public static GameStateManager Instance;
 
+    [Header("Ship Resources")]
     [SerializeField]
     private int shipFood = 100;
     public int ShipFood { get { return shipFood; } private set { shipFood = value; } }
+
     [SerializeField]
     private int shipParts = 100;
     public int ShipParts { get { return shipParts; } private set { shipParts = value; } }
+
     [SerializeField]
     private int shipEnergy = 100;
     public int ShipEnergy { get { return shipEnergy; } private set { shipEnergy = value; } }
+
+    [Header("Day / Turn")]
     [SerializeField]
     private int day = 1;
     public int Day
@@ -24,21 +29,24 @@ public class GameStateManager : MonoBehaviourPunCallbacks
         set
         {
             day = value;
+            // 모든 클라이언트에 Day 변경 브로드캐스트
             photonView.RPC("OnDayChanged", RpcTarget.All, day);
         }
     }
 
+    [Header("Day Panel UI")]
     public GameObject dayPanelPrefab;
     private GameObject dayPanelInstance;
     private TMP_Text dayText;
     public float displayDuration = 3f;
 
+    [Header("Timer UI")]
     public GameObject timerPrefab;
     private GameObject timerInstance;
     private TMP_Text timerText;
     private float timer = 60f;
-
     private Button continueButton;
+
     private bool isAdvancingDay = false;
 
     [System.Serializable]
@@ -49,8 +57,10 @@ public class GameStateManager : MonoBehaviourPunCallbacks
         public int Hunger = 0;
     }
 
+    [Header("Player States")]
     public PlayerState[] PlayerStates;
 
+    // 우주선 UI 참조
     private SpaceshipUIManager spaceshipUIManager;
 
     private void Awake()
@@ -90,6 +100,8 @@ public class GameStateManager : MonoBehaviourPunCallbacks
         ShipFood = 100;
         ShipParts = 100;
         ShipEnergy = 100;
+        UpdateUI();
+
         ShowDayPanel();
         ShowTimerPanel();
     }
@@ -111,23 +123,49 @@ public class GameStateManager : MonoBehaviourPunCallbacks
         }
     }
 
+    // ===========================
+    //  Ship 자원 변경용 메서드들
+    // ===========================
+
+    // 인벤토리 / 이벤트 등에서 호출할 공식 메서드
+    public void AddShipFood(int amount)
+    {
+        ShipFood = Mathf.Clamp(ShipFood + amount, 0, 100);
+        UpdateUI();
+    }
+
+    public void AddShipParts(int amount)
+    {
+        ShipParts = Mathf.Clamp(ShipParts + amount, 0, 100);
+        UpdateUI();
+    }
+
+    public void AddShipEnergy(int amount)
+    {
+        ShipEnergy = Mathf.Clamp(ShipEnergy + amount, 0, 100);
+        UpdateUI();
+    }
+
+    // 기존 UpdateShipXXX 를 이미 다른 코드에서 쓰고 있을 수 있으니,
+    // 내부적으로 AddShipXXX 를 호출하게 연결
     public void UpdateShipFood(int amount)
     {
-        ShipFood += amount;
-        UpdateUI();
+        AddShipFood(amount);
     }
 
     public void UpdateShipParts(int amount)
     {
-        ShipParts += amount;
-        UpdateUI();
+        AddShipParts(amount);
     }
 
     public void UpdateShipEnergy(int amount)
     {
-        ShipEnergy += amount;
-        UpdateUI();
+        AddShipEnergy(amount);
     }
+
+    // ===========================
+    //  Player 스탯 변경
+    // ===========================
 
     public void UpdatePlayerHealth(int playerIndex, int amount)
     {
@@ -158,8 +196,12 @@ public class GameStateManager : MonoBehaviourPunCallbacks
 
     private bool IsValidPlayerIndex(int index)
     {
-        return index >= 0 && index < PlayerStates.Length;
+        return PlayerStates != null && index >= 0 && index < PlayerStates.Length;
     }
+
+    // ===========================
+    //  Day / 이벤트 처리
+    // ===========================
 
     public void AdvanceDay()
     {
@@ -167,24 +209,26 @@ public class GameStateManager : MonoBehaviourPunCallbacks
 
         Debug.Log("AdvanceDay called");
         isAdvancingDay = true;
-        Day++;
+        Day++;  // setter에서 OnDayChanged RPC 호출
         isAdvancingDay = false;
     }
 
     [PunRPC]
-private void OnDayChanged(int newDay)
-{
-    day = newDay;
-    if (PhotonNetwork.IsMasterClient)
+    private void OnDayChanged(int newDay)
     {
-        EventManager.Instance.SelectRandomEvent(); // 이벤트 선택
-        // 결과 eventId를 사용하려 했으나, SelectRandomEvent는 void를 반환하므로 다음 RPC 호출 부분 수정 필요
-    }
-    UpdateUI();
-    ShowDayPanel();
-    ShowTimerPanel();
-}
+        day = newDay;
 
+        // 마스터에서만 이벤트 선택
+        if (PhotonNetwork.IsMasterClient)
+        {
+            EventManager.Instance.SelectRandomEvent();
+            // SelectRandomEvent() 내부에서 ApplyEventToAllClients 를 호출하도록 설계해도 됨
+        }
+
+        UpdateUI();
+        ShowDayPanel();
+        ShowTimerPanel();
+    }
 
     [PunRPC]
     public void ApplyEventToAllClients(string eventId)
@@ -192,29 +236,30 @@ private void OnDayChanged(int newDay)
         GameEvent gameEvent = EventManager.Instance.GetEventById(eventId);
         if (gameEvent != null)
         {
-            // 이벤트 효과 적용
             ApplyEventEffects(gameEvent);
         }
     }
 
     public void ApplyEventEffects(GameEvent gameEvent)
     {
-        // 이벤트 효과 동기화
-        photonView.RPC("SyncStats", RpcTarget.All, gameEvent.foodChange, gameEvent.partsChange, gameEvent.energyChange);
+        // 우주선 자원 변화 동기화
+        photonView.RPC("SyncStats", RpcTarget.All,
+            gameEvent.foodChange, gameEvent.partsChange, gameEvent.energyChange);
 
+        // 플레이어 스탯 변화 동기화
         for (int i = 0; i < PlayerStates.Length; i++)
         {
-            photonView.RPC("SyncPlayerStats", RpcTarget.All, i, gameEvent.healthChange, gameEvent.staminaChange, gameEvent.hungerChange);
+            photonView.RPC("SyncPlayerStats", RpcTarget.All,
+                i, gameEvent.healthChange, gameEvent.staminaChange, gameEvent.hungerChange);
         }
     }
 
     [PunRPC]
     public void SyncStats(int foodChange, int partsChange, int energyChange)
     {
-        ShipFood += foodChange;
-        ShipParts += partsChange;
-        ShipEnergy += energyChange;
-        UpdateUI();
+        AddShipFood(foodChange);
+        AddShipParts(partsChange);
+        AddShipEnergy(energyChange);
     }
 
     [PunRPC]
@@ -229,8 +274,18 @@ private void OnDayChanged(int newDay)
         }
     }
 
+    // ===========================
+    //  Day Panel / Timer UI
+    // ===========================
+
     public void ShowDayPanel()
     {
+        if (dayPanelPrefab == null)
+        {
+            Debug.LogError("dayPanelPrefab is not assigned.");
+            return;
+        }
+
         if (dayPanelInstance == null)
         {
             dayPanelInstance = Instantiate(dayPanelPrefab, transform);
@@ -241,7 +296,8 @@ private void OnDayChanged(int newDay)
         {
             dayPanelInstance.SetActive(true);
             dayText.text = $"Day-{Day}";
-            Invoke("HideDayPanel", displayDuration);
+            CancelInvoke(nameof(HideDayPanel));
+            Invoke(nameof(HideDayPanel), displayDuration);
         }
         else
         {
@@ -251,18 +307,32 @@ private void OnDayChanged(int newDay)
 
     public void ShowTimerPanel()
     {
+        if (timerPrefab == null)
+        {
+            Debug.LogError("timerPrefab is not assigned.");
+            return;
+        }
+
         if (timerInstance == null)
         {
             timerInstance = Instantiate(timerPrefab, transform);
             timerText = timerInstance.GetComponentInChildren<TMP_Text>();
             continueButton = timerInstance.GetComponentInChildren<Button>();
-            continueButton.onClick.AddListener(OnContinueButtonClicked);
+            if (continueButton != null)
+            {
+                continueButton.onClick.RemoveAllListeners();
+                continueButton.onClick.AddListener(OnContinueButtonClicked);
+            }
         }
 
         if (timerInstance != null)
         {
+            timer = 60f; // 새 타이머 시작
             timerInstance.SetActive(true);
-            timerText.text = $"Time remaining: {timer} seconds";
+            if (timerText != null)
+            {
+                timerText.text = $"Time remaining: {timer} seconds";
+            }
         }
         else
         {
@@ -280,7 +350,7 @@ private void OnDayChanged(int newDay)
 
     private void OnContinueButtonClicked()
     {
-          EndTimerAndProceed(); // 메서드 이름 수정
+        EndTimerAndProceed();
     }
 
     private void EndTimerAndProceed()
@@ -298,8 +368,13 @@ private void OnDayChanged(int newDay)
             timerInstance.SetActive(false);
         }
 
-        PhotonNetwork.LoadLevel("PlayScene"); // 다음 씬으로 전환
+        // 여기서 PlayScene으로 전환 (탐사 시작)
+        PhotonNetwork.LoadLevel("PlayScene");
     }
+
+    // ===========================
+    //  UI 연동
+    // ===========================
 
     public void UpdateUI()
     {
@@ -312,5 +387,7 @@ private void OnDayChanged(int newDay)
     public void SetSpaceshipUIManager(SpaceshipUIManager uiManager)
     {
         spaceshipUIManager = uiManager;
+        // 새로 세팅 시 현재 상태를 바로 반영
+        spaceshipUIManager.UpdateUI();
     }
 }

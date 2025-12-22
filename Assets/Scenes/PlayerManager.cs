@@ -4,35 +4,28 @@ using UnityEngine;
 
 public class PlayerManager : MonoBehaviourPunCallbacks
 {
-    public GameObject[] playerSprites; // 1~4번 스프라이트
+    public GameObject[] playerSprites;
 
     private void Start()
     {
-        if (PhotonNetwork.IsConnectedAndReady)
-        {
-            UpdatePlayerSprites();
-        }
+        TryUpdate();
     }
 
-    public override void OnPlayerEnteredRoom(Player newPlayer)
-    {
-        UpdatePlayerSprites();
-    }
+    public override void OnJoinedRoom() => TryUpdate();
+    public override void OnPlayerEnteredRoom(Player newPlayer) => TryUpdate();
+    public override void OnPlayerLeftRoom(Player otherPlayer) => TryUpdate();
+    public override void OnMasterClientSwitched(Player newMasterClient) => TryUpdate();
 
-    public override void OnPlayerLeftRoom(Player otherPlayer)
+    void TryUpdate()
     {
+        if (!PhotonNetwork.IsConnectedAndReady) return;
         UpdatePlayerSprites();
     }
 
     private void UpdatePlayerSprites()
     {
         int playerCount = PhotonNetwork.PlayerList.Length;
-        if (playerCount <= playerSprites.Length)
-        {
-            for (int i = 0; i < playerSprites.Length; i++)
-            {
-                playerSprites[i].SetActive(i < playerCount);
-            }
-        }
+        for (int i = 0; i < playerSprites.Length; i++)
+            playerSprites[i].SetActive(i < playerCount);
     }
 }

@@ -1,6 +1,6 @@
 using UnityEngine;
 using TMPro;
-using MyGameNamespace; // GameManager 네임스페이스 참조
+using MyGameNamespace;
 
 public class PlanetSceneController : MonoBehaviour
 {
@@ -9,12 +9,29 @@ public class PlanetSceneController : MonoBehaviour
 
     void Start()
     {
-        int planetIndex = GameManager.Instance.SelectedPlanetIndex; // 선택된 행성 인덱스를 가져옴
-        var planetInfo = GameManager.Instance.GetPlanetInfo(planetIndex);
-        if (planetInfo != null)
+        if (GameManager.Instance == null)
         {
-            riskText.text = "Risk: " + planetInfo.Risk;
-            assetsText.text = "Assets: " + planetInfo.Asset;
+            Debug.LogError("[PlanetSceneController] GameManager.Instance가 null입니다. " +
+                           "첫 씬에 GameManager 오브젝트가 있고 DontDestroyOnLoad인지 확인하세요.");
+            return;
         }
+
+        if (riskText == null || assetsText == null)
+        {
+            Debug.LogError("[PlanetSceneController] riskText/assetsText가 인스펙터에 연결되지 않았습니다.");
+            return;
+        }
+
+        int planetIndex = GameManager.Instance.SelectedPlanetIndex;
+        var planetInfo = GameManager.Instance.GetPlanetInfo(planetIndex);
+
+        if (planetInfo == null)
+        {
+            Debug.LogWarning($"[PlanetSceneController] planetInfo가 null입니다. index={planetIndex}");
+            return;
+        }
+
+        riskText.text   = "Risk: " + planetInfo.Risk;
+        assetsText.text = "Assets: " + planetInfo.Asset;
     }
 }

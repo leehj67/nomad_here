@@ -52,6 +52,23 @@ MonoBehaviour:
   - ApplyEventEffects
   - OnHostDisconnected
   - PickupItem
+  - RPC_AddItemToLocal
+  - RPC_DepositAck
+  - RPC_DepositItem
+  - RPC_PickupResult
+  - RPC_RequestPickup
+  - RPC_TryAddOnClient
+  - RPC_SyncCount
+  - RPC_RequestSolve
+  - RPC_SetSolved
+  - RPC_SetBoarded
+  - RPC_SyncBoardedCount
+  - RPC_GiveItem
+  - RPC_PickResult
+  - RPC_ResetAll
+  - RPC_ResetNode
+  - RPC_PrepareSceneChange
+  - RPC_SetMainDoorLocked
   DisableAutoOpenWizard: 1
   ShowSettings: 0
   DevRegionSetOnce: 1

@@ -180,7 +180,7 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     public override void OnJoinedLobby()
     {
         Debug.Log("Joined Lobby");
-        PhotonNetwork.GetCustomRoomList(TypedLobby.Default, ""); // 방 목록 갱신 요청
+        //PhotonNetwork.GetCustomRoomList(TypedLobby.Default, ""); // 방 목록 갱신 요청
     }
 
     public override void OnLeftLobby()

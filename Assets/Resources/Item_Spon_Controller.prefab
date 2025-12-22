@@ -46,7 +46,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c77c9773da9a42e4ba81bb4032a2eee8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  itemPrefab: {fileID: 4692128522093276861, guid: ed00e608899cb2041b450c6be26e825a, type: 3}
+  mapRoot: {fileID: 0}
+  squareRoot: {fileID: 0}
+  itemPrefabs:
+  - {fileID: 4692128522093276861, guid: ed00e608899cb2041b450c6be26e825a, type: 3}
+  spawnCount: 40
+  noDuplicateSquares: 1
+  squareNameStartsWith: Square
+  randomOffsetRadius: 0.1
 --- !u!114 &4998506843015362916
 MonoBehaviour:
   m_ObjectHideFlags: 0
